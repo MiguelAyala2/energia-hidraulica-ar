@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motor Hidráulico en AR</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+</head>
+<body class="page-ar">
+  <header class="site">
+    <h1>Funcionamiento de un Motor Hidráulico</h1>
+    <p>Escaneá este QR o tocá "Ver en Realidad Aumentada"</p>
+  </header>
+
+  <main>
+    <model-viewer
+      src="/models/turbina.glb"
+      ios-src="/models/turbina.usdz"
+      alt="Modelo 3D animado de una turbina hidráulica"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      poster="/assets/img/turbina-poster.jpg">
+      <button slot="ar-button" class="btn">Ver en Realidad Aumentada</button>
+    </model-viewer>
+
+    <div class="contenido">
+      <h3>¿Cómo funciona?</h3>
+      <p>
+        El agua almacenada en la represa baja con fuerza por la tubería forzada
+        y choca contra las aspas del rodete de la turbina, haciéndola girar.
+        Ese giro se transmite por el eje hasta el generador, que transforma el
+        movimiento mecánico en electricidad.
+      </p>
+
+      <h3>Tipos de turbina representados</h3>
+      <p>
+        El modelo muestra una turbina <strong>Francis</strong>, de flujo mixto:
+        el agua entra de forma radial (desde los costados hacia el centro) y
+        sale de forma axial (hacia abajo). Se usa en saltos y caudales medios,
+        el caso más común en centrales hidroeléctricas grandes.
+      </p>
+
+      <h3>Partes que podés identificar en AR</h3>
+      <p>Tubería forzada → rodete de la turbina → eje → generador eléctrico.</p>
+    </div>
+
+    <a class="volver" href="/index.html">← Volver al inicio</a>
+  </main>
+
+  <footer class="site">
+    Proyecto de investigación — Energía Hidráulica · 2026
+  </footer>
+</body>
+</html>

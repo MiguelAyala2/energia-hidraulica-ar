@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Represa de Itaipú en AR</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+</head>
+<body class="page-ar">
+  <header class="site">
+    <h1>Represa de Itaipú</h1>
+    <p>Escaneá este QR o tocá "Ver en Realidad Aumentada"</p>
+  </header>
+
+  <main>
+    <model-viewer
+      src="/models/itaipu.glb"
+      ios-src="/models/itaipu.usdz"
+      alt="Modelo 3D de la represa de Itaipú"
+      ar
+      ar-modes="webxr scene-viewer quick-look"
+      camera-controls
+      auto-rotate
+      shadow-intensity="1"
+      poster="/assets/img/itaipu-poster.jpg">
+      <button slot="ar-button" class="btn">Ver en Realidad Aumentada</button>
+    </model-viewer>
+
+    <div class="contenido">
+      <h3>¿Qué es Itaipú?</h3>
+      <p>
+        Itaipú es una central hidroeléctrica binacional entre Paraguay y
+        Brasil, construida sobre el río Paraná. Es una de las centrales de
+        mayor generación de energía del mundo.
+      </p>
+
+      <h3>Cómo funciona</h3>
+      <p>
+        El embalse acumula agua del río Paraná gracias a la presa principal.
+        Al abrir las compuertas, el agua cae por las tuberías forzadas hacia
+        la casa de máquinas, donde gira las turbinas y genera electricidad que
+        se distribuye a ambos países mediante líneas de alta tensión.
+      </p>
+
+      <h3>Partes que podés identificar en AR</h3>
+      <p>Presa principal → embalse → vertedero → casa de máquinas → río aguas abajo.</p>
+    </div>
+
+    <a class="volver" href="/index.html">← Volver al inicio</a>
+  </main>
+
+  <footer class="site">
+    Proyecto de investigación — Energía Hidráulica · 2026
+  </footer>
+</body>
+</html>
