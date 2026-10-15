@@ -7,6 +7,34 @@ export function quatEjeAngulo(eje, anguloRad) {
   return [x * s, y * s, z * s, Math.cos(anguloRad / 2)];
 }
 
+// Rotacion + punto medio + longitud necesarios para que un cilindro
+// (cuyo eje largo es Y) quede alineado entre dos puntos cualquiera.
+export function alinearEntrePuntos(p1, p2) {
+  const dx = p2[0] - p1[0];
+  const dy = p2[1] - p1[1];
+  const dz = p2[2] - p1[2];
+  const longitud = Math.sqrt(dx * dx + dy * dy + dz * dz);
+  const dir = [dx / longitud, dy / longitud, dz / longitud];
+  const up = [0, 1, 0];
+
+  const ejeX = up[1] * dir[2] - up[2] * dir[1];
+  const ejeY = up[2] * dir[0] - up[0] * dir[2];
+  const ejeZ = up[0] * dir[1] - up[1] * dir[0];
+  const ejeLen = Math.sqrt(ejeX * ejeX + ejeY * ejeY + ejeZ * ejeZ);
+  const dot = Math.min(1, Math.max(-1, up[0] * dir[0] + up[1] * dir[1] + up[2] * dir[2]));
+  const angulo = Math.acos(dot);
+
+  let rotacion;
+  if (ejeLen < 1e-6) {
+    rotacion = dot > 0 ? [0, 0, 0, 1] : quatEjeAngulo([1, 0, 0], Math.PI);
+  } else {
+    rotacion = quatEjeAngulo([ejeX / ejeLen, ejeY / ejeLen, ejeZ / ejeLen], angulo);
+  }
+
+  const centro = [(p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2, (p1[2] + p2[2]) / 2];
+  return { centro, rotacion, longitud };
+}
+
 export function agregarMalla(doc, buffer, geo, material, nombre) {
   const posAccessor = doc
     .createAccessor(`${nombre}_pos`)
@@ -36,10 +64,34 @@ export function agregarMalla(doc, buffer, geo, material, nombre) {
   return doc.createMesh(nombre).addPrimitive(prim);
 }
 
-export function material(doc, nombre, [r, g, b, a], rugosidad = 0.4, metalico = 0.1) {
-  return doc
+export function material(doc, nombre, baseColorRGBA, opciones = {}) {
+  const {
+    rugosidad = 0.4,
+    metalico = 0.1,
+    transparente = false,
+    alpha = 0.3,
+    dobleCara = false,
+    emisivo = null,
+  } = opciones;
+
+  const mat = doc
     .createMaterial(nombre)
-    .setBaseColorFactor([r, g, b, a])
+    .setBaseColorFactor(baseColorRGBA)
     .setRoughnessFactor(rugosidad)
     .setMetallicFactor(metalico);
+
+  if (transparente) {
+    mat.setAlphaMode('BLEND');
+    mat.setBaseColorFactor([baseColorRGBA[0], baseColorRGBA[1], baseColorRGBA[2], alpha]);
+  }
+
+  if (dobleCara) {
+    mat.setDoubleSided(true);
+  }
+
+  if (emisivo) {
+    mat.setEmissiveFactor(emisivo);
+  }
+
+  return mat;
 }

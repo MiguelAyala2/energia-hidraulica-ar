@@ -1,90 +1,129 @@
 // Genera public/models/turbina.glb: una turbina hidraulica tipo Francis
-// (la misma familia que usan Itaipu y Acaray) con el rodete + eje +
-// generador animados girando en loop. No depende de Blender.
+// (la misma familia que usan Itaipu y Acaray), con la carcasa y la
+// tuberia transparentes para ver el agua y el rodete girando adentro, y
+// un LED encendido representando la electricidad generada. No depende
+// de Blender.
 
 import { Document, NodeIO } from '@gltf-transform/core';
-import { cilindro, caja } from './geometria.js';
-import { agregarMalla, material, quatEjeAngulo } from './gltf-utils.js';
+import { cilindro, caja, plano, esfera, aspaCurva } from './geometria.js';
+import { agregarMalla, material, quatEjeAngulo, alinearEntrePuntos } from './gltf-utils.js';
 
 const doc = new Document();
 const buffer = doc.createBuffer();
 
-const matTuberia = material(doc, 'Tuberia', [0.25, 0.45, 0.75, 1]);
-const matCarcasa = material(doc, 'Carcasa', [0.55, 0.55, 0.58, 1], 0.5, 0.6);
-const matRodete = material(doc, 'Rodete', [0.85, 0.45, 0.10, 1], 0.3, 0.7);
-const matEje = material(doc, 'Eje', [0.15, 0.15, 0.17, 1], 0.3, 0.8);
-const matGenerador = material(doc, 'Generador', [0.65, 0.10, 0.10, 1], 0.4, 0.3);
+const matEmbalse = material(doc, 'Embalse', [0.15, 0.45, 0.70, 1], { rugosidad: 0.1 });
+const matTuboTransparente = material(doc, 'TuboTransparente', [0.75, 0.85, 0.95, 1], {
+  rugosidad: 0.05, metalico: 0, transparente: true, alpha: 0.25, dobleCara: true,
+});
+const matAgua = material(doc, 'Agua', [0.15, 0.55, 0.85, 1], { rugosidad: 0.1 });
+const matCarcasaTransparente = material(doc, 'CarcasaTransparente', [0.8, 0.85, 0.9, 1], {
+  rugosidad: 0.08, metalico: 0, transparente: true, alpha: 0.2, dobleCara: true,
+});
+const matRodete = material(doc, 'Rodete', [0.78, 0.12, 0.10, 1], { rugosidad: 0.25, metalico: 0.5, dobleCara: true });
+const matEje = material(doc, 'Eje', [0.6, 0.6, 0.63, 1], { rugosidad: 0.25, metalico: 0.8 });
+const matGenerador = material(doc, 'Generador', [0.5, 0.5, 0.54, 1], { rugosidad: 0.35, metalico: 0.6 });
+const matCobre = material(doc, 'Cobre', [0.72, 0.45, 0.2, 1], { rugosidad: 0.3, metalico: 0.7 });
+const matCable = material(doc, 'Cable', [0.08, 0.08, 0.08, 1], { rugosidad: 0.6, metalico: 0 });
+const matLED = material(doc, 'LED', [1, 0.95, 0.6, 1], {
+  rugosidad: 0.1, metalico: 0, emisivo: [1, 0.85, 0.3],
+});
 
 const scene = doc.createScene('Escena');
 
-// Tuberia forzada: trae el agua desde la represa, inclinada
-const mallaTuberia = agregarMalla(
-  doc, buffer,
-  cilindro({ radioSup: 0.07, radioInf: 0.07, altura: 0.8, segmentos: 20 }),
-  matTuberia, 'Tuberia_forzada',
-);
-const nodoTuberia = doc.createNode('Tuberia_forzada')
-  .setMesh(mallaTuberia)
-  .setTranslation([-0.35, 0.75, 0])
-  .setRotation(quatEjeAngulo([0, 0, 1], (55 * Math.PI) / 180));
-scene.addChild(nodoTuberia);
+function agregarNodo(nombre, geo, mat, { pos = [0, 0, 0], rot = null, padre = scene } = {}) {
+  const malla = agregarMalla(doc, buffer, geo, mat, nombre);
+  const nodo = doc.createNode(nombre).setMesh(malla).setTranslation(pos);
+  if (rot) nodo.setRotation(rot);
+  padre.addChild(nodo);
+  return nodo;
+}
 
-// Carcasa espiral (voluta) que envuelve el rodete
-const mallaCarcasa = agregarMalla(
-  doc, buffer,
-  cilindro({ radioSup: 0.26, radioInf: 0.26, altura: 0.22, segmentos: 24 }),
-  matCarcasa, 'Carcasa_espiral',
-);
-const nodoCarcasa = doc.createNode('Carcasa_espiral')
-  .setMesh(mallaCarcasa)
-  .setTranslation([0, 0.35, 0]);
-scene.addChild(nodoCarcasa);
+// Embalse: superficie de agua representando la reserva aguas arriba
+agregarNodo('Embalse', plano({ ancho: 0.5, profundidad: 0.5 }), matEmbalse, { pos: [-0.6, 1.08, 0] });
 
-// Pivote de rotacion: cuelgan de el el rodete, los alabes, el eje y el
-// generador, para que giren todos juntos (eje vertical, igual que en una
-// turbina real).
+// Tuberia forzada: tubo transparente + un cilindro de agua azul adentro
+const rotTuberia = quatEjeAngulo([0, 0, 1], (55 * Math.PI) / 180);
+agregarNodo(
+  'Tuberia_forzada',
+  cilindro({ radioSup: 0.085, radioInf: 0.085, altura: 0.8, segmentos: 20 }),
+  matTuboTransparente,
+  { pos: [-0.35, 0.75, 0], rot: rotTuberia },
+);
+agregarNodo(
+  'Agua_tuberia',
+  cilindro({ radioSup: 0.065, radioInf: 0.065, altura: 0.78, segmentos: 20 }),
+  matAgua,
+  { pos: [-0.35, 0.75, 0], rot: rotTuberia },
+);
+
+// Carcasa espiral (voluta) transparente, para ver el rodete adentro
+agregarNodo(
+  'Carcasa_espiral',
+  cilindro({ radioSup: 0.28, radioInf: 0.28, altura: 0.24, segmentos: 24 }),
+  matCarcasaTransparente,
+  { pos: [0, 0.35, 0] },
+);
+
+// Pivote de rotacion: rodete + aspas + eje + generador giran juntos
 const pivote = doc.createNode('Pivote_rotacion').setTranslation([0, 0.35, 0]);
 scene.addChild(pivote);
 
-const mallaRodete = agregarMalla(
-  doc, buffer,
-  cilindro({ radioSup: 0.16, radioInf: 0.16, altura: 0.08, segmentos: 24 }),
-  matRodete, 'Rodete',
+// Cubo central del rodete
+agregarNodo(
+  'Rodete_cubo',
+  cilindro({ radioSup: 0.045, radioInf: 0.045, altura: 0.1, segmentos: 16 }),
+  matRodete,
+  { padre: pivote },
 );
-const nodoRodete = doc.createNode('Rodete').setMesh(mallaRodete).setTranslation([0, 0, 0]);
-pivote.addChild(nodoRodete);
 
-for (let i = 0; i < 8; i++) {
-  const ang = (i / 8) * Math.PI * 2;
-  const x = 0.16 * Math.cos(ang);
-  const z = 0.16 * Math.sin(ang);
-  const mallaAlabe = agregarMalla(
-    doc, buffer,
-    caja({ ancho: 0.02, alto: 0.09, profundidad: 0.09 }),
-    matRodete, `Alabe_${i}`,
+// 10 aspas curvas en espiral alrededor del cubo
+const NUM_ASPAS = 10;
+for (let i = 0; i < NUM_ASPAS; i++) {
+  const ang = (i / NUM_ASPAS) * Math.PI * 2;
+  agregarNodo(
+    `Aspa_${i}`,
+    aspaCurva({ radioInterno: 0.045, radioExterno: 0.17, alturaBlade: 0.085, anguloTwist: Math.PI / 2 }),
+    matRodete,
+    { padre: pivote, rot: quatEjeAngulo([0, 1, 0], ang) },
   );
-  const nodoAlabe = doc.createNode(`Alabe_${i}`)
-    .setMesh(mallaAlabe)
-    .setTranslation([x, 0, z])
-    .setRotation(quatEjeAngulo([0, 1, 0], ang));
-  pivote.addChild(nodoAlabe);
 }
 
-const mallaEje = agregarMalla(
-  doc, buffer,
+// Eje: conecta el rodete con el generador
+agregarNodo(
+  'Eje',
   cilindro({ radioSup: 0.035, radioInf: 0.035, altura: 0.55, segmentos: 12 }),
-  matEje, 'Eje',
+  matEje,
+  { padre: pivote, pos: [0, 0.33, 0] },
 );
-const nodoEje = doc.createNode('Eje').setMesh(mallaEje).setTranslation([0, 0.33, 0]);
-pivote.addChild(nodoEje);
 
-const mallaGenerador = agregarMalla(
-  doc, buffer,
+// Generador: carcasa del generador + anillo de cobre decorativo
+agregarNodo(
+  'Generador',
   cilindro({ radioSup: 0.2, radioInf: 0.2, altura: 0.3, segmentos: 24 }),
-  matGenerador, 'Generador',
+  matGenerador,
+  { padre: pivote, pos: [0, 0.75, 0] },
 );
-const nodoGenerador = doc.createNode('Generador').setMesh(mallaGenerador).setTranslation([0, 0.75, 0]);
-pivote.addChild(nodoGenerador);
+agregarNodo(
+  'Bobinado',
+  cilindro({ radioSup: 0.13, radioInf: 0.13, altura: 0.08, segmentos: 24 }),
+  matCobre,
+  { padre: pivote, pos: [0, 0.75, 0] },
+);
+
+// Salida electrica: cable + LED encendido (fijo, no gira con el eje)
+const puntoGenerador = [0.2, 0.35 + 0.75, 0];
+const puntoLED = [0.4, 1.15, 0];
+const { centro, rotacion, longitud } = alinearEntrePuntos(puntoGenerador, puntoLED);
+agregarNodo(
+  'Cable_salida',
+  cilindro({ radioSup: 0.008, radioInf: 0.008, altura: longitud, segmentos: 8 }),
+  matCable,
+  { pos: centro, rot: rotacion },
+);
+agregarNodo('LED_salida', esfera({ radio: 0.04, segmentosLat: 8, segmentosLon: 12 }), matLED, { pos: puntoLED });
+
+// Salida de agua (nivel inferior), aguas abajo de la carcasa
+agregarNodo('Salida_de_agua', plano({ ancho: 0.5, profundidad: 0.4 }), matAgua, { pos: [0.55, 0.1, 0] });
 
 // Animacion: una vuelta completa cada 2 segundos, en loop (model-viewer
 // repite la animacion solo gracias al atributo "autoplay" del HTML).

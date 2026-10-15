@@ -104,3 +104,83 @@ export function caja({ ancho = 1, alto = 1, profundidad = 1 }) {
 export function plano({ ancho = 1, profundidad = 1 }) {
   return caja({ ancho, alto: 0.01, profundidad });
 }
+
+export function esfera({ radio = 0.05, segmentosLat = 10, segmentosLon = 16 }) {
+  const positions = [];
+  const normals = [];
+  const indices = [];
+
+  for (let lat = 0; lat <= segmentosLat; lat++) {
+    const theta = (lat / segmentosLat) * Math.PI;
+    const sinTheta = Math.sin(theta);
+    const cosTheta = Math.cos(theta);
+    for (let lon = 0; lon <= segmentosLon; lon++) {
+      const phi = (lon / segmentosLon) * Math.PI * 2;
+      const x = Math.cos(phi) * sinTheta;
+      const y = cosTheta;
+      const z = Math.sin(phi) * sinTheta;
+      positions.push(x * radio, y * radio, z * radio);
+      normals.push(x, y, z);
+    }
+  }
+
+  for (let lat = 0; lat < segmentosLat; lat++) {
+    for (let lon = 0; lon < segmentosLon; lon++) {
+      const a = lat * (segmentosLon + 1) + lon;
+      const b = a + segmentosLon + 1;
+      indices.push(a, b, a + 1, b, b + 1, a + 1);
+    }
+  }
+
+  return {
+    positions: new Float32Array(positions),
+    normals: new Float32Array(normals),
+    indices: new Uint16Array(indices),
+  };
+}
+
+// Paleta curva del rodete: una cinta que va del radio interno (cubo) al
+// externo, girando "anguloTwist" grados, para que se vea como un alabe
+// en espiral en vez de una paleta plana.
+export function aspaCurva({
+  radioInterno = 0.04,
+  radioExterno = 0.15,
+  alturaBlade = 0.08,
+  anguloTwist = Math.PI / 2.2,
+  segmentos = 10,
+}) {
+  const positions = [];
+  const normals = [];
+  const indices = [];
+
+  for (let i = 0; i <= segmentos; i++) {
+    const t = i / segmentos;
+    const r = radioInterno + (radioExterno - radioInterno) * t;
+    const ang = anguloTwist * t;
+    const x = r * Math.cos(ang);
+    const z = r * Math.sin(ang);
+    const curvatura = (alturaBlade / 2) * Math.sin(t * Math.PI);
+
+    positions.push(x, curvatura + alturaBlade / 2, z);
+    positions.push(x, curvatura - alturaBlade / 2, z);
+
+    const nx = -Math.sin(ang);
+    const nz = Math.cos(ang);
+    normals.push(nx, 0, nz);
+    normals.push(nx, 0, nz);
+  }
+
+  for (let i = 0; i < segmentos; i++) {
+    const a = i * 2;
+    const b = a + 1;
+    const c = a + 2;
+    const d = a + 3;
+    indices.push(a, b, c, b, d, c);
+  }
+
+  return {
+    positions: new Float32Array(positions),
+    normals: new Float32Array(normals),
+    indices: new Uint16Array(indices),
+  };
+}

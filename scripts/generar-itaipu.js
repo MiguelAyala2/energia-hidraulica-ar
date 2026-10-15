@@ -9,10 +9,10 @@ import { agregarMalla, material } from './gltf-utils.js';
 const doc = new Document();
 const buffer = doc.createBuffer();
 
-const matConcreto = material(doc, 'Concreto', [0.72, 0.71, 0.68, 1], 0.7, 0.05);
-const matAgua = material(doc, 'Agua', [0.15, 0.40, 0.55, 1], 0.15, 0.0);
-const matCasaMaquinas = material(doc, 'CasaMaquinas', [0.80, 0.35, 0.15, 1], 0.5, 0.1);
-const matVertedero = material(doc, 'Vertedero', [0.85, 0.85, 0.85, 1], 0.6, 0.05);
+const matConcreto = material(doc, 'Concreto', [0.72, 0.71, 0.68, 1], { rugosidad: 0.7, metalico: 0.05 });
+const matAgua = material(doc, 'Agua', [0.15, 0.40, 0.55, 1], { rugosidad: 0.15, metalico: 0 });
+const matCasaMaquinas = material(doc, 'CasaMaquinas', [0.80, 0.35, 0.15, 1], { rugosidad: 0.5, metalico: 0.1 });
+const matVertedero = material(doc, 'Vertedero', [0.85, 0.85, 0.85, 1], { rugosidad: 0.6, metalico: 0.05 });
 
 const scene = doc.createScene('Escena');
 
