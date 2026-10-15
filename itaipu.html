@@ -1,5 +1,5 @@
 <!doctype html><html lang="es"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Represa de Itaipú</title>
+<title>Represa Itaipú Realista</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
@@ -40,6 +40,7 @@ canvas:active { cursor: grabbing; }
 .tag.on { border-color: var(--accent); }
 .views { position: absolute; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
 .hint { position: absolute; left: 12px; bottom: 10px; right: 12px; margin: 0; font: 400 11px/1.3 var(--f-mono); color: #eaf3fb; text-shadow: 0 1px 3px rgba(0,0,0,.7); pointer-events: none; }
+.fallback[hidden] { display: none; }
 .fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #10202e; }
 .btn, .chip { font: 500 13px/1 var(--f-body); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
 .btn { padding: 11px 14px; width: 100%; }
@@ -86,10 +87,10 @@ input[type=range] { width: 100%; accent-color: var(--water); margin: 2px 0 0; }
 
   <header class="top">
     <div>
-      <p class="eyebrow">Maqueta 3D · Itaipú Binacional · Paraguay y Brasil</p>
-      <h1>Represa de Itaipú</h1>
+      <p class="eyebrow">Maqueta 3D realista · Itaipú Binacional · Paraguay y Brasil</p>
+      <h1>Represa Itaipú Realista</h1>
     </div>
-    <p class="lede">El complejo completo, con la presa, el vertedero y la casa de fuerza, y un corte de una unidad generadora con la turbina Francis. Sigue el recorrido del agua desde el embalse hasta el río Paraná.</p>
+    <p class="lede">El complejo completo, con la presa, el vertedero y la casa de fuerza, y un corte de una unidad generadora con la turbina Francis, con luz solar, sombras y materiales opacos. Sigue el recorrido del agua desde el embalse hasta el río Paraná.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Vista">
@@ -126,7 +127,7 @@ input[type=range] { width: 100%; accent-color: var(--water); margin: 2px 0 0; }
       </div>
       <div class="blk">
         <h2>Vista</h2>
-        <label class="chk" for="cut"><input id="cut" type="checkbox" checked> Ver por dentro</label>
+        <label class="chk" for="cut"><input id="cut" type="checkbox" checked> Corte interior (vista de una unidad)</label>
         <label class="chk" for="lab"><input id="lab" type="checkbox" checked> Etiquetas</label>
         <label class="chk" for="slow"><input id="slow" type="checkbox" checked> Cámara lenta (30 %)</label>
       </div>
@@ -183,47 +184,105 @@ try { renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true }); }
 catch (err) { $('fallback').hidden = false; return; }
 var PR = Math.min(window.devicePixelRatio || 1, 2);
 renderer.setPixelRatio(PR);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.85;
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.localClippingEnabled = true;
 var scene = new THREE.Scene();
-scene.background = new THREE.Color(0x8fc0e8);
-scene.fog = new THREE.Fog(0x8fc0e8, 400, 1600);
+var LIN = function (h) { return new THREE.Color(h).convertSRGBToLinear(); };
+var SKY_TOP = LIN(0x3d7cc6), SKY_HOR = LIN(0xc6dbec), SKY_GND = LIN(0x4d5c63);
+var SUN_DIR = V3(-0.52, 0.56, 0.5).normalize();
+scene.background = null;
+scene.fog = new THREE.Fog(0xffffff, 700, 2600); scene.fog.color.copy(SKY_HOR);
 var camera = new THREE.PerspectiveCamera(40, 1.6, 0.5, 4000);
-scene.add(new THREE.HemisphereLight(0xd2e8ff, 0x55664a, 0.95));
-var sun = new THREE.DirectionalLight(0xfff2dc, 0.95); sun.position.set(200, 320, 260); scene.add(sun);
-var fill = new THREE.DirectionalLight(0x9cc4ff, 0.3); fill.position.set(-200, 80, -150); scene.add(fill);
+/* cielo: degradado con sol, también usado como mapa de entorno para los reflejos */
+var skyMat = new THREE.ShaderMaterial({
+  uniforms: { uTop: { value: SKY_TOP }, uHor: { value: SKY_HOR }, uGnd: { value: SKY_GND }, uSun: { value: SUN_DIR } },
+  vertexShader: 'varying vec3 vD; void main(){ vD = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'uniform vec3 uTop; uniform vec3 uHor; uniform vec3 uGnd; uniform vec3 uSun; varying vec3 vD;\n' +
+    'void main(){ vec3 d = normalize(vD); float h = d.y; vec3 c = h > 0.0 ? mix(uHor, uTop, pow(clamp(h, 0.0, 1.0), 0.5)) : mix(uHor, uGnd, clamp(-h * 5.0, 0.0, 1.0));\n' +
+    'float s = max(dot(d, uSun), 0.0); c += vec3(1.0, 0.86, 0.62) * (pow(s, 900.0) * 8.0 + pow(s, 14.0) * 0.22);\n' +
+    'gl_FragColor = vec4(c, 1.0);\n#include <tonemapping_fragment>\n#include <encodings_fragment>\n}',
+  side: THREE.BackSide, depthWrite: false
+});
+var sky = new THREE.Mesh(new THREE.SphereGeometry(3000, 40, 20), skyMat); sky.frustumCulled = false; sky.renderOrder = -1; scene.add(sky);
+var hemi = new THREE.HemisphereLight(0xd7e8ff, 0x5b5a48, 0.32); scene.add(hemi);
+var sun = new THREE.DirectionalLight(0xfff1dc, 2.5); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0003;
+scene.add(sun); scene.add(sun.target);
+function setSun(cx, cz, half, dist, nb) {
+  sun.target.position.set(cx, 0, cz); sun.position.set(cx + SUN_DIR.x * dist, SUN_DIR.y * dist, cz + SUN_DIR.z * dist);
+  var c = sun.shadow.camera; c.left = -half; c.right = half; c.top = half; c.bottom = -half; c.near = 1; c.far = dist * 2.4; c.updateProjectionMatrix();
+  sun.shadow.normalBias = nb;
+}
 
 var gC = new THREE.Group(), gS = new THREE.Group();
 scene.add(gC); scene.add(gS); gS.visible = false;
 
 /* ---------- materiales y utilidades ---------- */
-function M(c, o) { return new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.7, metalness: 0.1 }, o || {})); }
-var ghosts = [], wires = [];
-function ghost(color, inside, outside) {
-  var m = new THREE.MeshStandardMaterial({ color: color, roughness: 0.5, metalness: 0.2, transparent: true, opacity: inside, side: THREE.DoubleSide, depthWrite: false });
-  ghosts.push({ m: m, inside: inside, outside: outside }); return m;
+function M(c, o) {
+  var m = new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.7, metalness: 0.1 }, o || {}));
+  m.color.convertSRGBToLinear(); if (o && o.emissive != null) m.emissive.convertSRGBToLinear(); return m;
+}
+/* material con ruido procedural en coordenadas de mundo (hormigón, pasto, roca) */
+var NOISE = 'float h3(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }\n' +
+  'float vn(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f * f * (3.0 - 2.0 * f);' +
+  ' return mix(mix(mix(h3(i), h3(i + vec3(1.0, 0.0, 0.0)), f.x), mix(h3(i + vec3(0.0, 1.0, 0.0)), h3(i + vec3(1.0, 1.0, 0.0)), f.x), f.y),' +
+  ' mix(mix(h3(i + vec3(0.0, 0.0, 1.0)), h3(i + vec3(1.0, 0.0, 1.0)), f.x), mix(h3(i + vec3(0.0, 1.0, 1.0)), h3(i + vec3(1.0, 1.0, 1.0)), f.x), f.y), f.z); }\n' +
+  'float fbm(vec3 p){ float a = 0.5, s = 0.0; for (int i = 0; i < 4; i++) { s += a * vn(p); p = p * 2.03 + vec3(1.7, 9.2, 3.1); a *= 0.5; } return s; }\n';
+function NM(c, o, n) {
+  var m = M(c, o); n = n || {};
+  var U = { uSc: { value: n.sc || 0.3 }, uAmt: { value: n.amt == null ? 0.2 : n.amt }, uStr: { value: n.str || 0 }, uBand: { value: n.band || 0 },
+    uTint: { value: LIN(n.tint || c) }, uTintA: { value: n.tintA || 0 } };
+  m.onBeforeCompile = function (sh) {
+    for (var k in U) sh.uniforms[k] = U[k];
+    sh.vertexShader = 'varying vec3 vWP;\n' + sh.vertexShader.replace('#include <project_vertex>',
+      '#include <project_vertex>\nvec4 wq = vec4(transformed, 1.0);\n#ifdef USE_INSTANCING\nwq = instanceMatrix * wq;\n#endif\nvWP = (modelMatrix * wq).xyz;');
+    sh.fragmentShader = 'varying vec3 vWP;\nuniform float uSc; uniform float uAmt; uniform float uStr; uniform float uBand; uniform float uTintA; uniform vec3 uTint;\n' + NOISE +
+      sh.fragmentShader.replace('vec4 diffuseColor = vec4( diffuse, opacity );', 'vec4 diffuseColor = vec4( diffuse, opacity );\n' +
+      '{ vec3 q = vWP * uSc; float n1 = fbm(q); float n2 = vn(q * 9.0);\n' +
+      '  diffuseColor.rgb = mix(diffuseColor.rgb, uTint, uTintA * smoothstep(0.42, 0.68, n1));\n' +
+      '  diffuseColor.rgb *= 1.0 + uAmt * ((n1 - 0.47) * 1.8 + (n2 - 0.5) * 0.5);\n' +
+      '  if (uStr > 0.0) { float st = vn(vec3(q.x * 5.0, q.y * 0.35, q.z * 5.0)); diffuseColor.rgb *= 1.0 - uStr * smoothstep(0.5, 0.95, st); }\n' +
+      '  if (uBand > 0.0) { diffuseColor.rgb *= 1.0 - 0.07 * smoothstep(0.88, 1.0, fract(vWP.y * uBand)); } }');
+  };
+  return m;
+}
+/* corte opaco: planos de recorte en lugar de transparencias */
+var CLIP0 = [new THREE.Plane(V3(0, 0, -1), 0)];        /* conserva z <= 0 (eje de la unidad) */
+var CLIPP = [new THREE.Plane(V3(0, 0, -1), 11.81)];    /* conserva z <= 11,8 m (eje del conducto forzado) */
+var clipMats = [], frontParts = [];
+function ghost(color, a, b, planes) {
+  var col = (color === 0x7aa7c7 || color === 0x6fa8cf) ? 0x7b848c : color;
+  var m = M(col, { roughness: 0.5, metalness: 0.45, side: THREE.DoubleSide });
+  m.userData.planes = planes || CLIP0; m.clipShadows = true; clipMats.push(m); return m;
 }
 function setCut(on) {
-  ghosts.forEach(function (g) { g.m.opacity = on ? g.inside : g.outside; g.m.depthWrite = !on; g.m.needsUpdate = true; });
-  wires.forEach(function (w) { w.visible = on; });
+  clipMats.forEach(function (m) { m.clippingPlanes = on ? m.userData.planes : []; m.needsUpdate = true; });
+  frontParts.forEach(function (o) { o.visible = !on; });
 }
 function lathe(pts, seg, mat) { return new THREE.Mesh(new THREE.LatheGeometry(pts.map(function (p) { return new THREE.Vector2(p[0], p[1]); }), seg), mat); }
 function rectRing(r0, r1, y0, y1) { return [[r0, y0], [r1, y0], [r1, y1], [r0, y1], [r0, y0]]; }
 function box(g, w, h, d, x, y, z, mat) { var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); g.add(m); return m; }
-function wireOf(geo, color, op) {
-  var w = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: color, wireframe: true, transparent: true, opacity: op, depthWrite: false }));
-  wires.push(w); return w;
-}
-function waterTexture(seed, base) {
-  var c = document.createElement('canvas'); c.width = 256; c.height = 256;
-  var x = c.getContext('2d'), s = seed;
-  x.fillStyle = base || '#d3e6f3'; x.fillRect(0, 0, 256, 256);
+function wireOf() { return new THREE.Object3D(); }
+/* mapa de normales de oleaje, repetible, generado en un canvas */
+function waterTexture(seed) {
+  var N = 256, c = document.createElement('canvas'); c.width = N; c.height = N;
+  var x = c.getContext('2d'), s = seed, h = new Float32Array(N * N), waves = [], i, j, k;
   function rnd() { s = (s * 16807) % 2147483647; return s / 2147483647; }
-  for (var i = 0; i < 90; i++) {
-    var len = 12 + rnd() * 50, px = rnd() * (256 - len), py = rnd() * 256;
-    x.fillStyle = rnd() > 0.5 ? '#ffffff' : '#a9c8dc'; x.globalAlpha = 0.35 + rnd() * 0.4; x.fillRect(px, py, len, 1 + rnd() * 2);
+  for (k = 0; k < 16; k++) waves.push([(1 + Math.floor(rnd() * 8)) * (rnd() < 0.5 ? -1 : 1), 1 + Math.floor(rnd() * 12), rnd() * TAU, 1 / (1 + k * 0.4)]);
+  for (j = 0; j < N; j++) for (i = 0; i < N; i++) { var v = 0; for (k = 0; k < 16; k++) { var w = waves[k]; v += w[3] * Math.sin(TAU * (w[0] * i + w[1] * j) / N + w[2]); } h[j * N + i] = v; }
+  if (!x || !x.createImageData) { var t0 = new THREE.CanvasTexture(c); t0.wrapS = t0.wrapT = THREE.RepeatWrapping; return t0; }
+  var img = x.createImageData(N, N), d = img.data;
+  for (j = 0; j < N; j++) for (i = 0; i < N; i++) {
+    var dx = h[j * N + (i + 1) % N] - h[j * N + (i + N - 1) % N], dy = h[((j + 1) % N) * N + i] - h[((j + N - 1) % N) * N + i];
+    var nx = -dx * 3, ny = -dy * 3, l = Math.sqrt(nx * nx + ny * ny + 1), p = (j * N + i) * 4;
+    d[p] = (nx / l * 0.5 + 0.5) * 255; d[p + 1] = (ny / l * 0.5 + 0.5) * 255; d[p + 2] = (1 / l * 0.5 + 0.5) * 255; d[p + 3] = 255;
   }
-  x.globalAlpha = 1;
+  x.putImageData(img, 0, 0);
   var t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
 }
+function waterMat(c, tex, ns) { return M(c, { roughness: 0.07, metalness: 0.0, normalMap: tex, normalScale: new THREE.Vector2(ns, ns), envMapIntensity: 1.1 }); }
 function sampleAll(curve, n) {
   var fr = curve.computeFrenetFrames(n, false), P = [], T = [];
   for (var i = 0; i <= n; i++) { P.push(curve.getPointAt(i / n)); T.push(curve.getTangentAt(i / n)); }
@@ -351,10 +410,10 @@ window.addEventListener('resize', resize);
    ===================================================================== */
 var Y_RES = 12.2, Y_CR = 12.7, Y_DK = 4.6, ZP0 = 6.2, ZP1 = 16.1;
 var XU = []; for (var xi = 0; xi < 20; xi++) XU.push(-42.75 + 4.5 * xi);
-var concrete = M(0xa89a8c, { roughness: 0.85 }), concreteD = M(0x8d7f72, { roughness: 0.9 });
+var concrete = NM(0xa49987, { roughness: 0.88 }, { sc: 0.35, amt: 0.2, str: 0.25 }), concreteD = NM(0x978b7d, { roughness: 0.9 }, { sc: 0.35, amt: 0.2, str: 0.22 });
 var steel = M(0x4b535c, { roughness: 0.5, metalness: 0.5 }), orange = M(0xe8821e, { roughness: 0.6 });
-var landMat = M(0x6e9248, { roughness: 1 }), rockMat = M(0x7b7468, { roughness: 1 });
-var Yup = V3(0, 1, 0);
+var landMat = NM(0x58703a, { roughness: 1 }, { sc: 0.025, amt: 0.35, tint: 0x8e5a3a, tintA: 0.4 }), rockMat = NM(0x7b7468, { roughness: 1 }, { sc: 0.5, amt: 0.3 });
+var Yup = V3(0, 1, 0), DXT = 0.62 / Math.hypot(0.62, 0.79), DZT = 0.79 / Math.hypot(0.62, 0.79);
 function along(g, a, b, r, mat, seg) {
   var d = V3(b.x - a.x, b.y - a.y, b.z - a.z), L = d.length();
   var m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, seg || 14), mat);
@@ -372,35 +431,35 @@ function along(g, a, b, r, mat, seg) {
   var geo = new THREE.ShapeGeometry(sh); geo.rotateX(-PI / 2);
   var land = new THREE.Mesh(geo, landMat); land.position.y = 1.2; gC.add(land);
   /* tierra a la altura del embalse */
-  var hi = new THREE.Mesh(new THREE.PlaneGeometry(1800, 1100), M(0x57803d, { roughness: 1 }));
+  var hi = new THREE.Mesh(new THREE.PlaneGeometry(1800, 1100), landMat);
   hi.rotation.x = -PI / 2; hi.position.set(0, 11.7, -550); gC.add(hi);
   /* cauce del río */
-  var rv = new THREE.Mesh(new THREE.PlaneGeometry(1800, 560), M(0x1f6f93, { roughness: 0.6 }));
+  var rv = new THREE.Mesh(new THREE.PlaneGeometry(1800, 560), M(0x163a45, { roughness: 0.8 }));
   rv.rotation.x = -PI / 2; rv.position.set(0, -0.05, 260); gC.add(rv);
   /* colinas de fondo y topes de la presa */
   [[-330, 8, 330, 110], [310, 9, 340, 120], [0, 6, 560, 200], [-600, 12, 100, 160], [600, 12, 120, 170], [-420, 14, -250, 130], [450, 14, -260, 140]].forEach(function (h) {
-    var m = new THREE.Mesh(new THREE.SphereGeometry(h[3], 24, 12), M(0x4f7a3a, { roughness: 1 }));
+    var m = new THREE.Mesh(new THREE.SphereGeometry(h[3], 32, 14), NM(0x34502a, { roughness: 1 }, { sc: 0.05, amt: 0.4, tint: 0x4a5a2c, tintA: 0.4 }));
     m.scale.y = 0.22; m.position.set(h[0], h[1] - 4, h[2]); gC.add(m);
   });
 })();
 
 /* --- embalse --- */
 var resTex = waterTexture(11, '#cfe4f1'), rivTex = waterTexture(29, '#cfe4f1');
-resTex.repeat.set(10, 8); rivTex.repeat.set(9, 12);
+resTex.repeat.set(36, 28); rivTex.repeat.set(30, 20);
 (function buildReservoir() {
   var sh = new THREE.Shape();
   [[-700, 30.9], [-253.6, 30.9], [-134.1, 30.9], [-90, 0], [700, 0], [700, -520], [-700, -520]].forEach(function (p, i) { if (i) sh.lineTo(p[0], -p[1]); else sh.moveTo(p[0], -p[1]); });
   var g = new THREE.ShapeGeometry(sh); g.rotateX(-PI / 2);
-  var w = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ color: 0x2a93b8, map: resTex, roughness: 0.25, metalness: 0.1 }));
+  var w = new THREE.Mesh(g, waterMat(0x1a4f63, resTex, 0.16));
   w.position.y = Y_RES; gC.add(w);
   [[-120, -90, 40, 12], [60, -200, 55, 10], [210, -140, 36, 8], [-230, -260, 70, 14], [330, -330, 90, 12], [-60, -380, 50, 8]].forEach(function (p) {
-    var m = new THREE.Mesh(new THREE.SphereGeometry(p[2], 20, 10), M(0x3d6a2c, { roughness: 1 }));
+    var m = new THREE.Mesh(new THREE.SphereGeometry(p[2], 24, 12), NM(0x2e4a25, { roughness: 1 }, { sc: 0.12, amt: 0.4 }));
     m.scale.set(1, p[3] / p[2] * 0.5, 0.7); m.position.set(p[0], Y_RES - 0.5, p[1]); gC.add(m);
   });
 })();
-var riverW = new THREE.Mesh(new THREE.PlaneGeometry(900, 520), new THREE.MeshStandardMaterial({ color: 0x2b86ab, map: rivTex, transparent: true, opacity: 0.88, roughness: 0.25 }));
+var riverW = new THREE.Mesh(new THREE.PlaneGeometry(900, 520), waterMat(0x24586a, rivTex, 0.17));
 riverW.rotation.x = -PI / 2; riverW.position.set(0, 0, 276); gC.add(riverW);
-var isl = new THREE.Mesh(new THREE.SphereGeometry(14, 20, 10), M(0x5d7f3e, { roughness: 1 })); isl.scale.set(1.2, 0.18, 0.8); isl.position.set(52, 0, 66); gC.add(isl);
+var isl = new THREE.Mesh(new THREE.SphereGeometry(14, 20, 10), NM(0x4a6d31, { roughness: 1 }, { sc: 0.1, amt: 0.3 })); isl.scale.set(1.2, 0.18, 0.8); isl.position.set(52, 0, 66); gC.add(isl);
 
 /* --- presas: perfiles (z, y) extruidos a lo largo del eje --- */
 var PROF_CONC = [[0, -3], [0, Y_CR], [1.8, Y_CR], [7.0, Y_DK], [7.0, -3]];
@@ -410,22 +469,23 @@ function segAt(pts, len, px, pz, theta, mat) {
   var g = new THREE.Group(); g.position.set(px, 0, pz); g.rotation.y = theta;
   g.add(profileWall(pts, 0, len, mat)); gC.add(g); return g;
 }
-var damMat = ghost(0xa89a8c, 0.3, 1);
+var damMat = NM(0xa59a88, { roughness: 0.88 }, { sc: 0.4, amt: 0.18, str: 0.35 });
 seg(PROF_CONC, -44.2, 44.2, damMat);                      /* presa principal, 884 m */
 seg(PROF_CONC, 44.2, 79.2, damMat);                       /* presa del borde izquierdo */
 segAt(PROF_CONC, 45.8, -90, 0, 0, damMat);                /* presa lateral derecha (tramo recto) */
 segAt(PROF_CONC, 53.9, -134.1, 30.9, 0.611, damMat);      /* presa lateral derecha (tramo curvo) */
-seg(PROF_EMB, 79.2, 149.2, M(0x8a8272, { roughness: 1 })); /* enrocado izquierdo, acortado */
-seg(PROF_EMB, 149.2, 209.2, M(0x86905a, { roughness: 1 })); /* dique de tierra izquierdo, acortado */
+seg(PROF_EMB, 79.2, 149.2, NM(0x8b8476, { roughness: 1 }, { sc: 1.4, amt: 0.4 })); /* enrocado izquierdo, acortado */
+seg(PROF_EMB, 149.2, 209.2, NM(0x6f8a45, { roughness: 1 }, { sc: 0.2, amt: 0.3, tint: 0x8f8a5c, tintA: 0.4 })); /* dique de tierra izquierdo, acortado */
 (function () {
   var g = new THREE.Group(); g.position.set(0, 0, 30.9); gC.add(g);
-  var m = profileWall(PROF_EMB, -253.6, -169.6, M(0x86905a, { roughness: 1 })); m.position.z = 0; g.add(m); /* dique derecho */
+  var m = profileWall(PROF_EMB, -253.6, -169.6, NM(0x6f8a45, { roughness: 1 }, { sc: 0.2, amt: 0.3, tint: 0x8f8a5c, tintA: 0.4 })); m.position.z = 0; g.add(m); /* dique derecho */
 })();
 [[240, 12.2, -6, 90], [-290, 12.2, 24, 90]].forEach(function (h) {
-  var m = new THREE.Mesh(new THREE.SphereGeometry(h[3], 24, 12), M(0x4f7a3a, { roughness: 1 })); m.scale.y = 0.14; m.position.set(h[0], h[1] - 1, h[2]); gC.add(m);
+  var m = new THREE.Mesh(new THREE.SphereGeometry(h[3], 24, 12), NM(0x34502a, { roughness: 1 }, { sc: 0.05, amt: 0.4 })); m.scale.y = 0.14; m.position.set(h[0], h[1] - 1, h[2]); gC.add(m);
 });
 
 /* --- caras de la presa principal: contrafuertes, conductos forzados y tomas --- */
+var penMat = NM(0xc2b8a8, { roughness: 0.8 }, { sc: 0.6, amt: 0.15, str: 0.3 });
 (function buildFace() {
   var nZ = 0.841, nY = 0.54;
   for (var k = 0; k <= 20; k++) {
@@ -436,7 +496,7 @@ seg(PROF_EMB, 149.2, 209.2, M(0x86905a, { roughness: 1 })); /* dique de tierra i
   for (var i = 0; i < 20; i++) {
     var xx = XU[i];
     var p0 = V3(xx, 11.24, 3.44), p1 = V3(xx, 4.92, 7.5);
-    along(gC, p0, p1, 0.55, steel, 16);
+    along(gC, p0, p1, 0.6, penMat, 20);
     box(gC, 2.9, 1.3, 1.5, xx, Y_CR + 0.65, 1.0, M(0x9aa3aa, { roughness: 0.6 }));          /* torre de toma y compuerta */
     box(gC, 0.5, 0.3, 0.5, xx, Y_CR + 1.4, 0.8, orange);
   }
@@ -449,7 +509,9 @@ seg(PROF_EMB, 149.2, 209.2, M(0x86905a, { roughness: 1 })); /* dique de tierra i
 /* --- casa de fuerza, transformadores y subestaciones --- */
 var tfMat = M(0x6c8191, { roughness: 0.5, metalness: 0.4 });
 (function buildPower() {
-  box(gC, 96.8, 7.6, ZP1 - ZP0, 0, Y_DK / 2 - 1.5 + 0.0, (ZP0 + ZP1) / 2, M(0xc9c3ba, { roughness: 0.8 }));
+  box(gC, 96.8, 7.6, ZP1 - ZP0, 0, Y_DK / 2 - 1.5 + 0.0, (ZP0 + ZP1) / 2, NM(0xb1a99c, { roughness: 0.85 }, { sc: 0.4, amt: 0.15, str: 0.3 }));
+  for (var pl = 0; pl <= 20; pl++) box(gC, 0.6, 7.0, 0.35, -45 + 4.5 * pl, 0.9, ZP1 + 0.18, concreteD);           /* pilastras entre unidades */
+  box(gC, 88.4, 0.06, 1.0, 0, Y_CR + 0.03, 0.9, M(0x3b3e41, { roughness: 0.95 }));                                  /* calzada de la cresta */
   box(gC, 96.8, 0.35, ZP1 - ZP0 + 0.4, 0, Y_DK + 0.1, (ZP0 + ZP1) / 2, M(0xb4aea5, { roughness: 0.9 }));
   box(gC, 96.8, 2.4, 0.3, 0, 0.9, ZP1 + 0.05, M(0x7f786f, { roughness: 0.9 }));
   for (var i = 0; i < 20; i++) {
@@ -471,7 +533,50 @@ var tfMat = M(0x6c8191, { roughness: 0.5, metalness: 0.4 });
   });
 })();
 
+/* --- bosque ribereño (instancias) --- */
+(function buildTrees() {
+  var riv = [[-62, 16], [-62, 30], [-70, 60], [-95, 120], [-140, 200], [-190, 300], [-190, 520], [190, 520], [150, 300], [118, 180], [92, 100], [74, 40], [62, 16]];
+  function inRiver(x, z) { var c = false; for (var i = 0, j = riv.length - 1; i < riv.length; j = i++) { var xi = riv[i][0], zi = riv[i][1], xj = riv[j][0], zj = riv[j][1]; if (((zi > z) !== (zj > z)) && (x < (xj - xi) * (z - zi) / (zj - zi) + xi)) c = !c; } return c; }
+  var hills = [[-330, 8, 330, 110], [310, 9, 340, 120], [0, 6, 560, 200], [-600, 12, 100, 160], [600, 12, 120, 170]];
+  function ground(x, z) { var y = 1.2; hills.forEach(function (h) { var d2 = (x - h[0]) * (x - h[0]) + (z - h[2]) * (z - h[2]); if (d2 < h[3] * h[3]) y = Math.max(y, h[1] - 4 + 0.22 * Math.sqrt(h[3] * h[3] - d2)); }); return y; }
+  var N = 22000, im = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0), M(0xffffff, { roughness: 0.95, flatShading: true }), N);
+  var d = new THREE.Object3D(), col = new THREE.Color(), n = 0, tries = 0, s = 7;
+  function rnd() { s = (s * 16807) % 2147483647; return s / 2147483647; }
+  function edgeD(x, z) { var m = 1e9; for (var i = 0; i < riv.length - 1; i++) { var a = riv[i], b = riv[i + 1], ex = b[0] - a[0], ez = b[1] - a[1], t = clamp(((x - a[0]) * ex + (z - a[1]) * ez) / (ex * ex + ez * ez), 0, 1), dx = x - a[0] - ex * t, dz = z - a[1] - ez * t; m = Math.min(m, Math.sqrt(dx * dx + dz * dz)); } return m; }
+  function dens(x, z) { var f = 0.5 + 0.5 * Math.sin(x * 0.021 + 1.3) * Math.sin(z * 0.027 + 0.4) + 0.3 * Math.sin(x * 0.063 + z * 0.041); return clamp(f, 0, 1); }
+  while (n < 16000 && tries < 160000) {
+    tries++;
+    var x = (rnd() * 2 - 1) * 640, z = 28 + rnd() * 480;
+    if (inRiver(x, z) || (x < -88 && z < 44) || (x > 60 && z < 30) || (Math.abs(x) < 70 && z < 30)) continue;
+    if (Math.abs(Math.abs(x) - 100) < 16 && Math.abs(z - 76) < 11) continue;
+    if (Math.abs(x) > 90 && Math.abs(z - 76) < 3.5) continue;
+    var rx = x + 151.85, rz = z - 36.9, al = rx * DXT + rz * DZT, pp = Math.abs(-rx * DZT + rz * DXT);
+    if (al > -12 && al < 128 && pp < 25) continue;
+    if (edgeD(x, z) > 20 && rnd() > Math.pow(dens(x, z), 2) * 0.9) continue;
+    var sc = 0.55 + rnd() * 0.5, y = ground(x, z);
+    d.position.set(x, y + sc * 0.5, z); d.scale.set(sc, sc * (0.8 + rnd() * 0.7), sc); d.rotation.set(rnd(), rnd() * TAU, 0); d.updateMatrix();
+    im.setMatrixAt(n, d.matrix);
+    col.setHSL(0.22 + rnd() * 0.09, 0.35 + rnd() * 0.25, 0.1 + rnd() * 0.09).convertSRGBToLinear(); im.setColorAt(n, col); n++;
+  }
+  /* islas del embalse y colinas de la orilla */
+  var isles = [[-120, -90, 40, 6, Y_RES - 0.5], [60, -200, 55, 5, Y_RES - 0.5], [210, -140, 36, 4, Y_RES - 0.5], [-230, -260, 70, 7, Y_RES - 0.5], [330, -330, 90, 6, Y_RES - 0.5], [-60, -380, 50, 4, Y_RES - 0.5],
+    [-420, -250, 130, 0.22 * 130, 10], [450, -260, 140, 0.22 * 140, 10]];
+  isles.forEach(function (e) {
+    var k = Math.round(e[2] * e[2] * 0.035);
+    for (var t = 0; t < k && n < N; t++) {
+      var a = rnd() * TAU, r = Math.sqrt(rnd()) * 0.92, ex = r * Math.cos(a), ez = r * Math.sin(a);
+      var x = e[0] + ex * e[2], z = e[1] + ez * e[2] * 0.7, y = e[4] + e[3] * Math.sqrt(Math.max(0, 1 - r * r));
+      if (y < Y_RES + 0.2) continue;
+      var sc = 0.55 + rnd() * 0.5;
+      d.position.set(x, y + sc * 0.4, z); d.scale.set(sc, sc * (0.8 + rnd() * 0.7), sc); d.rotation.set(rnd(), rnd() * TAU, 0); d.updateMatrix();
+      im.setMatrixAt(n, d.matrix); col.setHSL(0.22 + rnd() * 0.09, 0.35 + rnd() * 0.25, 0.1 + rnd() * 0.09).convertSRGBToLinear(); im.setColorAt(n, col); n++;
+    }
+  });
+  im.count = n; gC.add(im);
+})();
+
 /* --- vertedero (margen derecha): 14 compuertas y 3 canales de descarga --- */
+var chuteTex = waterTexture(53); chuteTex.repeat.set(2, 14);
 var SPX = -151.85, SPZ = 30.9, spGates = [], chuteWater = [];
 var DIRL = Math.hypot(0.62, 0.79), DX = 0.62 / DIRL, DZ = 0.79 / DIRL, CH_L = 110, CH_Z0 = 36.9;
 (function buildSpillway() {
@@ -480,13 +585,13 @@ var DIRL = Math.hypot(0.62, 0.79), DX = 0.62 / DIRL, DZ = 0.79 / DIRL, CH_L = 11
   for (var k = 0; k <= 14; k++) box(gC, 0.6, 3.6, 6, -169.6 + k * 2.536, 11.8, SPZ + 1.2, concreteD);
   for (var g = 0; g < 14; g++) spGates.push(box(gC, 2.1, 2.1, 0.35, -169.6 + 1.268 + g * 2.536, 11.05, SPZ - 0.1, steel));
   var yaw = Math.atan2(DX, DZ), pitch = Math.atan2(8.6, CH_L);
-  var wMat = new THREE.MeshStandardMaterial({ color: 0xe6f4fc, emissive: 0x7fb4d6, emissiveIntensity: 0.35, transparent: true, opacity: 0, roughness: 0.3, depthWrite: false });
+  var wMat = M(0xcfe3ea, { roughness: 0.3, metalness: 0, normalMap: chuteTex, normalScale: new THREE.Vector2(0.9, 0.9), emissive: 0x6f8f9c, emissiveIntensity: 0.15 });
   for (var c = 0; c < 3; c++) {
     var cg = new THREE.Group(); cg.position.set(SPX + (c - 1) * 11.8, 10.0, CH_Z0);
     cg.rotation.order = 'YXZ'; cg.rotation.set(pitch, yaw, 0); gC.add(cg);
     box(cg, 9.6, 0.5, CH_L, 0, -0.25, CH_L / 2, concrete);
     box(cg, 0.6, 1.6, CH_L, -4.8, 0.5, CH_L / 2, concreteD); box(cg, 0.6, 1.6, CH_L, 4.8, 0.5, CH_L / 2, concreteD);
-    var w = box(cg, 8.6, 0.12, CH_L - 2, 0, 0.12, CH_L / 2, wMat.clone()); chuteWater.push(w);
+    var w = box(cg, 8.6, 0.35, CH_L - 2, 0, 0.2, CH_L / 2, wMat); w.visible = false; chuteWater.push(w);
   }
 })();
 
@@ -519,10 +624,10 @@ var elecCurves = [];
 })();
 var elecS = elecCurves.map(function (c) { var a = []; for (var i = 0; i <= 120; i++) a.push(c.getPointAt(i / 120)); return a; });
 var dotsC = [], dotMat = new THREE.MeshBasicMaterial({ color: 0xffc233 });
-for (var di = 0; di < 52; di++) { var dm = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 6), dotMat); dm.visible = false; gC.add(dm); dotsC.push(dm); }
+for (var di = 0; di < 52; di++) { var dm = new THREE.Mesh(new THREE.SphereGeometry(0.45, 8, 6), dotMat); dm.visible = false; gC.add(dm); dotsC.push(dm); }
 
 /* --- partículas del complejo: agua turbinada y agua del vertedero --- */
-var CN = 1700, PW = makePoints(CN, [0.2, 0.6, 0.95], gC);
+var CN = 1700, PW = makePoints(CN, [0.85, 0.92, 0.96], gC);
 var cU = new Uint8Array(CN), cT = new Float32Array(CN), cJ = new Float32Array(CN), cS = new Float32Array(CN);
 var NZ = [-16, 0.8, 3.4, 7.5, 9.5, 13, 16.4], NY = [12.0, 11.6, 11.2, 4.9, 2.3, 0.9, -0.2], NT = [0, 0.16, 0.2, 0.5, 0.58, 0.66, 0.72];
 function cRespawn(i, rnd) { cU[i] = (Math.random() * 20) | 0; cT[i] = rnd ? Math.random() : 0; cJ[i] = (Math.random() - 0.5) * 2.2; cS[i] = 0.5 + Math.random() * 0.35; }
@@ -539,7 +644,7 @@ function cPlace(i, fq) {
     var s = (t - 0.72) / 0.28; z = 16.4 + s * 130; y = 0.2;
     x = lerp(XU[u], XU[u] * 0.5, s) + cJ[i] * (1 + 5 * s); al = 0.9 * fq * (1 - sstep(0.7, 1, s));
   }
-  PW.pos[i * 3] = x; PW.pos[i * 3 + 1] = y; PW.pos[i * 3 + 2] = z; PW.alpha[i] = al; PW.size[i] = cS[i] * 2.4;
+  PW.pos[i * 3] = x; PW.pos[i * 3 + 1] = y; PW.pos[i * 3 + 2] = z; PW.alpha[i] = al; PW.size[i] = cS[i] * 1.3;
 }
 var SN = 1000, PSp = makePoints(SN, [0.82, 0.93, 1.0], gC);
 var sC = new Uint8Array(SN), sT = new Float32Array(SN), sL = new Float32Array(SN), sV = new Float32Array(SN);
@@ -561,12 +666,14 @@ function updC(dt, q, P) {
     if (u >= 1) { sRespawn(j, false); u = 0; }
     sT[j] = u;
     var x = SPX + (sC[j] - 1) * 11.8 + DX * CH_L * u + DZ * sL[j] * 0.97, z = CH_Z0 + DZ * CH_L * u - DX * sL[j] * 0.97;
-    PSp.pos[j * 3] = x; PSp.pos[j * 3 + 1] = 10.6 - 8.9 * u + Math.sin(u * 40 + j) * 0.25; PSp.pos[j * 3 + 2] = z;
-    PSp.alpha[j] = spillQ * 0.95 * sstep(0, 0.04, u) * (1 - sstep(0.88, 1, u)); PSp.size[j] = 1.2 + sV[j];
+    var sp = sstep(0.8, 1, u);
+    PSp.pos[j * 3] = x + sL[j] * sp * 0.8; PSp.pos[j * 3 + 1] = 10.6 - 8.9 * u + Math.sin(u * 40 + j) * 0.25 + sp * (2.5 + 3 * sV[j]); PSp.pos[j * 3 + 2] = z + sp * 6 * sV[j];
+    PSp.alpha[j] = spillQ * (0.8 - 0.45 * sp) * sstep(0, 0.04, u) * (1 - sstep(0.94, 1, u)); PSp.size[j] = (1.0 + sV[j]) * (1 + 3 * sp);
   }
   flush(PSp);
   for (var g = 0; g < spGates.length; g++) spGates[g].position.y = 11.05 + 2.4 * spillQ;
-  chuteWater.forEach(function (w) { w.material.opacity = spillQ * 0.85; });
+  chuteWater.forEach(function (w) { w.visible = spillQ > 0.03; w.scale.x = 0.25 + 0.75 * spillQ; });
+  chuteTex.offset.y -= dt * 2.2 * spillQ;
   rivTex.offset.x -= dt * 0.04 * (0.2 + q + spillQ); resTex.offset.x -= dt * 0.003;
   var on = P > 0.03; eT += dt * (0.05 + 0.5 * P);
   for (var d = 0; d < dotsC.length; d++) {
@@ -593,7 +700,7 @@ addLabel('C', 'R', 'Río Paraná', 20, 1.2, 90);
 var KS = 1.93, R_IN = 3.4, A0u = 2.72, RHO0u = R_IN + A0u, RPEN = 5.25;
 var gU = new THREE.Group(); gU.scale.setScalar(KS); gS.add(gU);
 var spinS = new THREE.Group(); gU.add(spinS);
-var volA = function (phi) { return 0.8 + (A0u - 0.8) * Math.pow(1 - phi / TAU, 0.6); };
+var volA = function (phi) { return 0.8 + (A0u - 0.8) * Math.pow(Math.max(0, 1 - phi / TAU), 0.6); };
 var volRho = function (phi) { return R_IN + volA(phi); };
 var crownR = function (u) { return 0.3 + 1.9 * Math.cos(u * PI / 2); };
 var crownY = function (u) { return 0.5 - 1.5 * Math.sin(u * PI / 2); };
@@ -602,6 +709,7 @@ var bandY = function (u) { return -0.5 - 1.3 * Math.sin(u * PI / 2); };
 var thb = function (u, v) { return -1.0 * Math.pow(u, 1.1) + 0.15 * v; };
 var gateMeshes = [], poleMesh;
 var copperMat = M(0xc97b3a, { roughness: 0.4, metalness: 0.7, emissive: 0xff7a1a, emissiveIntensity: 0 });
+copperMat.userData.planes = CLIP0; copperMat.clipShadows = true; clipMats.push(copperMat);
 function MS(c, o) { return M(c, Object.assign({ roughness: 0.4, metalness: 0.7 }, o || {})); }
 
 (function buildRunner() {
@@ -642,18 +750,22 @@ function MS(c, o) { return M(c, Object.assign({ roughness: 0.4, metalness: 0.7 }
   gU.add(lathe(rectRing(0.75, 3.9, 0.7, 0.85), 72, ghost(0x7aa7c7, 0.25, 0.97)));
   gU.add(lathe(rectRing(2.3, 3.9, -0.85, -0.7), 72, ghost(0x7aa7c7, 0.25, 0.97)));
   var barrel = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 3.0, 3.3, 64, 1, true), ghost(0x7aa7c7, 0.12, 0.9)); barrel.position.y = 2.5; gU.add(barrel);
-  gU.add(lathe(rectRing(4.2, 4.6, 4.2, 6.3), 72, MS(0x56677a, { side: THREE.DoubleSide })));
-  gU.add(lathe(rectRing(3.7, 4.6, 4.1, 4.25), 72, MS(0x56677a, { side: THREE.DoubleSide })));
+  gU.add(lathe(rectRing(4.2, 4.6, 4.2, 6.3), 72, ghost(0x56677a)));
+  gU.add(lathe(rectRing(3.7, 4.6, 4.1, 4.25), 72, ghost(0x56677a)));
   var gh = new THREE.Mesh(new THREE.CylinderGeometry(4.8, 4.8, 2.5, 72, 1, false), ghost(0x7aa7c7, 0.1, 0.92)); gh.position.y = 5.3; gU.add(gh);
   var im = new THREE.InstancedMesh(new THREE.BoxGeometry(0.28, 1.7, 0.4), copperMat, 72), d = new THREE.Object3D();
   for (var i = 0; i < 72; i++) { var a = i * TAU / 72; d.position.set(3.95 * Math.sin(a), 5.25, 3.95 * Math.cos(a)); d.rotation.set(0, a, 0); d.updateMatrix(); im.setMatrixAt(i, d.matrix); }
   gU.add(im);
   /* caracol (cámara espiral) */
-  var NP = 96, NS = 26, pos = [], idx = [], i2, j2, psi0 = -(PI - 0.62), psi1 = PI - 0.62;
-  for (i2 = 0; i2 <= NP; i2++) { var phi = i2 / NP * TAU, av = volA(phi), rho = R_IN + av; for (j2 = 0; j2 < NS + 1; j2++) { var psi = psi0 + (psi1 - psi0) * j2 / NS, rr = rho + av * Math.cos(psi); pos.push(rr * Math.sin(phi), av * Math.sin(psi), rr * Math.cos(phi)); } }
-  for (i2 = 0; i2 < NP; i2++) for (j2 = 0; j2 < NS; j2++) { var p = i2 * (NS + 1) + j2, q = p + NS + 1; idx.push(p, q, p + 1, q, q + 1, p + 1); }
-  var vg = new THREE.BufferGeometry(); vg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); vg.setIndex(idx); vg.computeVertexNormals();
-  gU.add(new THREE.Mesh(vg, ghost(0x6fa8cf, 0.2, 0.96))); gU.add(wireOf(vg, 0x2a6f9a, 0.22));
+  function volGeo(ph0, ph1, NP) {
+    var NS = 26, pos = [], idx = [], i2, j2, psi0 = -(PI - 0.62), psi1 = PI - 0.62;
+    for (i2 = 0; i2 <= NP; i2++) { var phi = ph0 + (ph1 - ph0) * i2 / NP, av = volA(phi), rho = R_IN + av; for (j2 = 0; j2 < NS + 1; j2++) { var psi = psi0 + (psi1 - psi0) * j2 / NS, rr = rho + av * Math.cos(psi); pos.push(rr * Math.sin(phi), av * Math.sin(psi), rr * Math.cos(phi)); } }
+    for (i2 = 0; i2 < NP; i2++) for (j2 = 0; j2 < NS; j2++) { var p = i2 * (NS + 1) + j2, q = p + NS + 1; idx.push(p, q, p + 1, q, q + 1, p + 1); }
+    var vg = new THREE.BufferGeometry(); vg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); vg.setIndex(idx); vg.computeVertexNormals(); return vg;
+  }
+  /* boca de entrada cortada por el eje del conducto; el resto del caracol, por el eje de la unidad */
+  gU.add(new THREE.Mesh(volGeo(0, 0.42, 10), ghost(0x6fa8cf, 0, 0, CLIPP)));
+  gU.add(new THREE.Mesh(volGeo(0.42, TAU, 90), ghost(0x6fa8cf)));
 })();
 
 /* tubo de aspiración (coordenadas de la unidad) */
@@ -662,35 +774,53 @@ var dtRad = function (u) { return u < 0.55 ? 1.25 + 0.35 * (u / 0.55) : 1.6 + 1.
 var dtG = varTube(dtCurve, 60, 28, dtRad);
 gU.add(new THREE.Mesh(dtG, ghost(0x6fa8cf, 0.2, 0.96))); gU.add(wireOf(dtG, 0x2a6f9a, 0.2));
 
-/* --- losa del corte: presa, casa de fuerza, agua y terreno (metros) --- */
+/* --- corte opaco: presa, casa de fuerza, agua y terreno (metros) ---
+   Todo lo que queda delante del plano de corte vive en frontParts y solo se ve con el corte apagado. */
+var ZB = -120, ZF = 60, ZCD = 6.5;
+var secConc = NM(0xa69b89, { roughness: 0.9 }, { sc: 0.05, amt: 0.1, str: 0.14, band: 1 / 3 });
+var secConcD = NM(0x978c7b, { roughness: 0.9 }, { sc: 0.05, amt: 0.1, str: 0.12, band: 1 / 3 });
+var deepW = M(0x123d4f, { roughness: 0.35 }), secLand = NM(0x5c7c3a, { roughness: 1 }, { sc: 0.05, amt: 0.3, tint: 0x8c7b4c, tintA: 0.4 });
+var secRock = NM(0x6a5d50, { roughness: 1 }, { sc: 0.12, amt: 0.35 });
+function prism(pts, z0, z1, mat, front) {
+  var sh = new THREE.Shape(); pts.forEach(function (p, i) { if (i) sh.lineTo(p[0], p[1]); else sh.moveTo(p[0], p[1]); });
+  var g = new THREE.ExtrudeGeometry(sh, { depth: z1 - z0, bevelEnabled: false }); g.translate(0, 0, z0);
+  var m = new THREE.Mesh(g, mat); gS.add(m); if (front) frontParts.push(m); return m;
+}
+function slab(x0, x1, y0, y1, z0, z1, mat, front) { return prism([[x0, y0], [x1, y0], [x1, y1], [x0, y1]], z0, z1, mat, front); }
+function waterBlock(x0, x1, y0, y1, z0, z1, top, front) {
+  var mats = [deepW, deepW, top, deepW, deepW, deepW];
+  var m = new THREE.Mesh(new THREE.BoxGeometry(x1 - x0, y1 - y0, z1 - z0), mats); m.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
+  gS.add(m); if (front) frontParts.push(m); return m;
+}
+var secResW = waterMat(0x1a4f63, resTex, 0.16), secRivW = waterMat(0x24586a, rivTex, 0.17);
 (function buildSection() {
-  var sh = new THREE.Shape();
-  [[-100, -60], [-100, 121], [-88, 121], [-24, 48], [-24, -60]].forEach(function (p, i) { if (i) sh.lineTo(p[0], p[1]); else sh.moveTo(p[0], p[1]); });
-  var g = new THREE.ExtrudeGeometry(sh, { depth: 45, bevelEnabled: false }); g.translate(0, 0, -22.5);
-  gS.add(new THREE.Mesh(g, ghost(0xa89a8c, 0.2, 1)));
-  var ph = new THREE.Mesh(new THREE.BoxGeometry(99, 100, 45), ghost(0xc9c3ba, 0.12, 1)); ph.position.set(25.5, -10, 0); gS.add(ph);
-  box(gS, 99, 1.2, 45, 25.5, 40.6, 0, concreteD);
-  var rock = new THREE.Mesh(new THREE.BoxGeometry(860, 20, 240), M(0x6a5d50, { roughness: 1 })); rock.position.set(0, -70, 0); gS.add(rock);
-  var resB = new THREE.Mesh(new THREE.BoxGeometry(320, 176, 240), new THREE.MeshStandardMaterial({ color: 0x2f90b8, transparent: true, opacity: 0.22, depthWrite: false, roughness: 0.3 }));
-  resB.position.set(-260, 28, 0); gS.add(resB);
-  var resT = new THREE.Mesh(new THREE.PlaneGeometry(320, 240), new THREE.MeshStandardMaterial({ color: 0x2a93b8, map: resTex, roughness: 0.25 }));
-  resT.rotation.x = -PI / 2; resT.position.set(-260, 116, 0); gS.add(resT);
-  var tw = new THREE.Mesh(new THREE.BoxGeometry(103, 54, 120), new THREE.MeshStandardMaterial({ color: 0x2f86b0, transparent: true, opacity: 0.25, depthWrite: false, roughness: 0.3 }));
-  tw.position.set(113.5, -33, 0); gS.add(tw);
-  var twT = new THREE.Mesh(new THREE.PlaneGeometry(103, 120), new THREE.MeshStandardMaterial({ color: 0x2b86ab, map: rivTex, transparent: true, opacity: 0.9, roughness: 0.25 }));
-  twT.rotation.x = -PI / 2; twT.position.set(113.5, -6, 0); gS.add(twT);
-  box(gS, 260, 60, 120, 295, -32, 0, M(0x6e9248, { roughness: 1 }));
-  box(gS, 320, 8, 240, -260, 120.6, 0, M(0x57803d, { roughness: 1 }));
-  box(gS, 2.2, 16.35, 8.23, -97.5, 106, 11.8, steel);                    /* compuerta de toma */
-  box(gS, 5, 4, 12, -97, 119, 11.8, M(0x9aa3aa));
-  var tf = box(gS, 14, 8, 9, 50, 45, 6, tfMat); tf.name = 'tf';
-  box(gS, 10, 5, 0.4, 50, 44, 10.4, M(0x55697a));
-  [[-5, 0], [5, 0]].forEach(function (o) { along(gS, V3(50 + o[0], 49, 6), V3(50 + o[0], 54, 6), 0.7, M(0xd8d2c4), 8); });
+  var DAM = [[-100, -60], [-100, 121], [-88, 121], [-24, 48], [-24, -60]];
+  prism(DAM, ZB, ZCD, secConc); prism(DAM, ZCD, ZF, secConc, true);
+  /* casa de fuerza: hueco del grupo, sala de máquinas y canal del tubo de aspiración */
+  var PH = [[-24, -60], [62, -60], [62, -20], [-6, -20], [-6, -8], [-19, -8], [-19, 15], [-20, 15], [-20, 36], [70, 36], [70, 15], [19, 15], [19, -8], [62, -8], [62, 0], [75, 0], [75, 40], [-24, 40]];
+  var PHO = [[-24, -60], [62, -60], [62, 0], [75, 0], [75, 40], [-24, 40]];
+  prism(PH, -18, 0, secConcD); prism(PHO, ZB, -18, secConcD); prism(PHO, 0, ZF, secConcD, true);
+  slab(-24, 75, 40, 41.2, ZB, 0, secConc); slab(-24, 75, 40, 41.2, 0, ZF, secConc, true);
+  /* piso de la sala y puente grúa */
+  slab(-20, 70, 15, 15.4, -18, 0, M(0x8b8f93, { roughness: 0.8 }));
+  box(gS, 90, 1.6, 2, 25, 32.5, -14, orange); box(gS, 90, 1.6, 2, 25, 32.5, -4, orange); box(gS, 4, 2.4, 12, 18, 31.2, -9, M(0x3d4349, { roughness: 0.6 }));
+  /* roca de fundación, agua y terreno */
+  slab(-430, 430, -160, -60, ZB, 0, secRock); slab(-430, 430, -160, -60, 0, ZF, secRock, true);
+  waterBlock(-420, -100, -60, 116, ZB, ZCD, secResW); waterBlock(-420, -100, -60, 116, ZCD, ZF, secResW, true);
+  waterBlock(62, 165, -60, -6, ZB, 0, secRivW); waterBlock(62, 165, -60, -6, 0, ZF, secRivW, true);
+  slab(165, 425, -62, -2, ZB, 0, secLand); slab(165, 425, -62, -2, 0, ZF, secLand, true);
+  slab(-430, -420, -60, 128, ZB, ZF, secLand);
+  /* compuerta de toma y su mecanismo, cortados por el eje del conducto */
+  box(gS, 2.2, 16.35, 8.23, -97.5, 106, 11.8, ghost(0x4b535c, 0, 0, CLIPP));
+  box(gS, 5, 4, 12, -97, 123, 11.8, ghost(0x9aa3aa, 0, 0, CLIPP));
+  var tf = box(gS, 14, 8, 9, 50, 45.2, -9, tfMat); tf.name = 'tf';
+  box(gS, 10, 5, 0.4, 50, 44.2, -4.4, M(0x55697a));
+  [[-5, 0], [5, 0]].forEach(function (o) { along(gS, V3(50 + o[0], 49, -9), V3(50 + o[0], 54, -9), 0.7, M(0xd8d2c4), 8); });
 })();
 
 /* conducto forzado: 10,5 m de diámetro y unos 142 m */
 var penC = new THREE.CatmullRomCurve3([[-96, 104], [-70, 76], [-42, 45], [-20, 19], [-8, 4], [-3, 0.8], [0, 0]].map(function (p) { return V3(p[0], p[1], RHO0u * KS); }), false, 'catmullrom', 0.5);
-gS.add(new THREE.Mesh(new THREE.TubeGeometry(penC, 100, RPEN, 28, false), ghost(0x6fa8cf, 0.2, 0.96)));
+gS.add(new THREE.Mesh(new THREE.TubeGeometry(penC, 100, RPEN, 28, false), ghost(0x5f676e, 0, 0, CLIPP)));
 gS.add(wireOf(new THREE.TubeGeometry(penC, 40, RPEN * 1.003, 14, false), 0x2a6f9a, 0.2));
 var penS = sampleAll(penC, 160), drS = sampleAll(dtCurve, 120), Lpen = penC.getLength(), Ldraft = dtCurve.getLength();
 
@@ -698,22 +828,22 @@ var penS = sampleAll(penC, 160), drS = sampleAll(dtCurve, 120), Lpen = penC.getL
 var sElec = (function () {
   var pm = M(0x8d969e, { roughness: 0.6, metalness: 0.5 }), verts = [], H = 46, bases = [[66, 40], [190, -2]];
   bases.forEach(function (b) {
-    var t = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 3.2, H, 4), pm); t.position.set(b[0], b[1] + H / 2, 0); t.rotation.y = PI / 4; gS.add(t);
-    box(gS, 1.2, 1, 18, b[0], b[1] + H * 0.85, 0, pm); box(gS, 1.2, 1, 12, b[0], b[1] + H * 0.65, 0, pm);
+    var t = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 3.2, H, 4), pm); t.position.set(b[0], b[1] + H / 2, -9); t.rotation.y = PI / 4; gS.add(t);
+    box(gS, 1.2, 1, 18, b[0], b[1] + H * 0.85, -9, pm); box(gS, 1.2, 1, 12, b[0], b[1] + H * 0.65, -9, pm);
   });
   [-8, 0, 8].forEach(function (zo) {
     var prev = null;
-    for (var s = 0; s <= 14; s++) { var f = s / 14, p = [lerp(66, 190, f), lerp(79, 37, f) - 6 * (1 - Math.pow(2 * f - 1, 2)), zo]; if (prev) verts.push(prev[0], prev[1], prev[2], p[0], p[1], p[2]); prev = p; }
+    for (var s = 0; s <= 14; s++) { var f = s / 14, p = [lerp(66, 190, f), lerp(79, 37, f) - 6 * (1 - Math.pow(2 * f - 1, 2)), zo]; if (prev) verts.push(prev[0], prev[1], prev[2] - 9, p[0], p[1], p[2] - 9); prev = p; }
   });
   var wg = new THREE.BufferGeometry(); wg.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
   gS.add(new THREE.LineSegments(wg, new THREE.LineBasicMaterial({ color: 0x20262c })));
-  var c = new THREE.CatmullRomCurve3([[6.3, 10, 6.3], [14, 12, 8], [30, 20, 6], [44, 38, 6], [50, 52, 6], [58, 66, 6], [66, 79, 0], [128, 60, 0], [190, 37, 0]].map(function (p) { return V3(p[0], p[1], p[2]); }));
+  var c = new THREE.CatmullRomCurve3([[6, 11, -2], [14, 13, -6], [30, 20, -9], [44, 38, -9], [50, 52, -9], [58, 66, -9], [66, 79, -9], [128, 60, -9], [190, 37, -9]].map(function (p) { return V3(p[0], p[1], p[2]); }));
   var a = []; for (var i = 0; i <= 120; i++) a.push(c.getPointAt(i / 120)); return a;
 })();
-var dotsS = []; for (var dsi = 0; dsi < 30; dsi++) { var dsm = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 6), dotMat); dsm.visible = false; gS.add(dsm); dotsS.push(dsm); }
+var dotsS = []; for (var dsi = 0; dsi < 30; dsi++) { var dsm = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 6), dotMat); dsm.visible = false; gS.add(dsm); dotsS.push(dsm); }
 
 /* --- partículas del corte --- */
-var QN = 2200, PQ = makePoints(QN, [0.2, 0.6, 0.95], gS);
+var QN = 2600, PQ = makePoints(QN, [0.36, 0.66, 0.9], gS);
 function Fq() { return new Float32Array(QN); }
 var qs = new Uint8Array(QN), qw = Fq(), qphi = Fq(), qdyE = Fq(), qox = Fq(), qoy = Fq(), qdr0 = Fq(), qdy0 = Fq(), qrot0 = Fq(), qchan = Fq(), qv = Fq(), qang0 = Fq(), qrEx = Fq(), qdyEx = Fq(), qoffY = Fq(), qoffZ = Fq(), qfo = Fq(), qzs = Fq(), qsz = Fq();
 var SW = 0.3, RUN_LEN = 3.2, RIV_LEN = 125, SV0 = 12 * KS, SV1 = 8, SV2 = 5, SV3 = 6, SV4 = 7, SV5 = 6 * KS;
@@ -726,7 +856,7 @@ function qRespawn(i) {
   qox[i] = rf * Math.cos(a); qoy[i] = rf * Math.sin(a); qphi[i] = 0.05 + Math.random() * (TAU - 0.1);
   qdyE[i] = (Math.random() - 0.5); qfo[i] = 0.15 + Math.random() * 0.7; qzs[i] = (Math.random() - 0.5) * 9 * KS;
 }
-for (var qi = 0; qi < QN; qi++) { qRespawn(qi); qw[qi] = Math.random(); qsz[qi] = (0.3 + Math.random() * 0.22) * KS * 1.1; }
+for (var qi = 0; qi < QN; qi++) { qRespawn(qi); qw[qi] = Math.random(); qsz[qi] = (0.3 + Math.random() * 0.22) * KS * 0.6; }
 function qPlace(i, fq) {
   var s = qs[i], ww = qw[i], x, y, z, al;
   if (s === 0) {
@@ -749,7 +879,7 @@ function qPlace(i, fq) {
     x = (_P.x + c * _N.x + sn * _B.x) * KS; y = (_P.y + c * _N.y + sn * _B.y + qdyEx[i] * (1 - sstep(0, 0.2, ww))) * KS; z = (_P.z + c * _N.z + sn * _B.z) * KS; al = 0.9 * fq;
   } else {
     var sm = sstep(0, 0.4, ww);
-    x = lerp(61.8, 150, ww); y = lerp(-14.1 + qoffY[i], -6.6, sm); z = qoffZ[i] * (1 - sm * 0.4) + qzs[i] * sm; al = 0.9 * fq * (1 - sstep(0.65, 1, ww));
+    x = lerp(61.8, 150, ww); y = lerp(-14.1 + qoffY[i], -6.6, sm); var zr = qoffZ[i] * (1 - sm * 0.4) + qzs[i] * sm; z = cutOn ? lerp(zr, 0.6 + Math.abs(zr) * 0.1, sm) : zr; al = 0.9 * fq * (1 - sstep(0.65, 1, ww));
   }
   PQ.pos[i * 3] = x; PQ.pos[i * 3 + 1] = y; PQ.pos[i * 3 + 2] = z; PQ.alpha[i] = al; PQ.size[i] = qsz[i] * (s >= 4 ? 1.25 : 1);
 }
@@ -807,9 +937,9 @@ addLabel('S', 1, 'Embalse de agua', -250, 126, 0);
 addLabel('S', 2, 'Toma y conducto forzado', -72, 90, 12);
 addLabel('S', 3, 'Turbina hidráulica', 14, -6, 0);
 addLabel('S', 4, 'Generador eléctrico', 16, 17, 0);
-addLabel('S', 5, 'Transformadores y líneas', 50, 58, 6);
+addLabel('S', 5, 'Transformadores y líneas', 50, 58, -9);
 addLabel('S', 'T', 'Tubo de aspiración', 30, -22, 0);
-addLabel('S', 'R', 'Río Paraná', 120, -6, 40);
+addLabel('S', 'R', 'Río Paraná', 120, -4, -10);
 
 /* =====================================================================
    CONTROLES, VISTAS Y BUCLE PRINCIPAL
@@ -856,7 +986,7 @@ function buildViews() {
 function setMode(m, instant) {
   mode = m; gC.visible = m === 'C'; gS.visible = m === 'S';
   $('tabC').setAttribute('aria-selected', m === 'C' ? 'true' : 'false'); $('tabS').setAttribute('aria-selected', m === 'S' ? 'true' : 'false');
-  var col = m === 'C' ? 0x8fc0e8 : 0xbad9ef; scene.background.setHex(col); scene.fog.color.setHex(col);
+  if (m === 'C') setSun(-40, 40, 330, 900, 0.3); else setSun(0, -30, 270, 700, 0.15);
   scene.fog.near = m === 'C' ? 700 : 1000; scene.fog.far = m === 'C' ? 2600 : 3200;
   buildViews(); highlight(0);
   goTo(PRES[m].all, instant);
@@ -923,10 +1053,18 @@ function frame(now) {
     cam.theta = lerp(f.theta, t.theta, e); cam.phi = lerp(f.phi, t.phi, e); cam.dist = lerp(f.dist, t.dist, e);
     if (k >= 1) tween = null;
   }
-  update(dt); applyCam(); renderer.render(scene, camera); updateLabels();
+  update(dt); applyCam(); sky.position.copy(camera.position); renderer.render(scene, camera); updateLabels();
   requestAnimationFrame(frame);
 }
 
+[gC, gS].forEach(function (g) {
+  g.traverse(function (o) { if (o.isMesh) { var mt = Array.isArray(o.material) ? o.material[0] : o.material; o.castShadow = !(mt.normalMap || mt.isMeshBasicMaterial); o.receiveShadow = true; } });
+});
+try {
+  var pmrem = new THREE.PMREMGenerator(renderer), envS = new THREE.Scene();
+  envS.add(new THREE.Mesh(new THREE.SphereGeometry(100, 32, 16), skyMat));
+  scene.environment = pmrem.fromScene(envS, 0.02).texture; pmrem.dispose();
+} catch (e) {}
 setCut(true);
 resize();
 setMode('C', true);
