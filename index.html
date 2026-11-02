@@ -2,56 +2,227 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Energía Hidráulica — Simuladores 3D Interactivos</title>
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b4ea2" />
+  <meta name="description" content="Proyecto de investigación sobre energía hidráulica: funcionamiento, tipos de turbinas, represas del Paraguay y simuladores 3D interactivos. Feria de Ciencias 2026." />
+  <title>Energía Hidráulica · Feria de Ciencias 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito+Sans:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/assets/css/inicio.css" />
 </head>
 <body>
-  <header class="site">
-    <div class="logos">
-      <img src="/assets/img/logo-gobierno.png" alt="Gobierno del Paraguay" />
-      <img src="/assets/img/escudo-colegio.png" alt="Colegio Nacional EMD Miguel Ángel Rodríguez" class="escudo" />
-      <img src="/assets/img/logo-mec.png" alt="Ministerio de Educación y Ciencias" />
+  <!-- Íconos reutilizables -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="hoja" viewBox="0 0 64 64">
+      <path d="M8 58C8 30 26 8 58 6c0 30-20 50-50 52z" fill="currentColor"/>
+      <path d="M10 56C24 40 36 28 52 14" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".7"/>
+    </symbol>
+    <symbol id="ola" viewBox="0 0 1440 120" preserveAspectRatio="none">
+      <path d="M0 60c120-40 240-40 360 0s240 40 360 0 240-40 360 0 240 40 360 0v60H0z" fill="currentColor"/>
+    </symbol>
+  </svg>
+
+  <nav class="barra" aria-label="Secciones">
+    <a class="marca" href="#inicio">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2s7 7.6 7 12.5A7 7 0 0 1 5 14.5C5 9.6 12 2 12 2z" fill="currentColor"/><path d="M13 9l-3 5h3l-1 4 3-5h-3z" fill="#ffd23f"/></svg>
+      <span>Energía Hidráulica</span>
+    </a>
+    <div class="menu">
+      <a href="#que-es">¿Qué es?</a>
+      <a href="#funciona">Cómo funciona</a>
+      <a href="#turbinas">Turbinas</a>
+      <a href="#represas">Represas</a>
+      <a href="#simuladores" class="menu-3d">3D</a>
+      <a href="#integrantes">Equipo</a>
     </div>
-    <div class="hero">
-      <p class="eyebrow">Feria de Ciencias · Proyecto Científico</p>
-      <h1>Energía Hidráulica</h1>
-      <p class="subtitulo">
-        Análisis del funcionamiento y la importancia de la energía hidráulica
-        como fuente limpia y estable de electricidad.
+  </nav>
+
+  <!-- PORTADA -->
+  <header id="inicio" class="portada">
+    <svg class="deco hoja-izq" aria-hidden="true"><use href="#hoja"/></svg>
+    <svg class="deco hoja-der" aria-hidden="true"><use href="#hoja"/></svg>
+    <div class="portada-in">
+      <p class="institucion">
+        <span>Ministerio de Educación y Ciencias</span>
+        <strong>Colegio Nacional EMD Miguel Ángel Rodríguez</strong>
+        <span class="feria">Feria de Ciencias 2026</span>
       </p>
+      <span class="pildora">Proyecto de investigación</span>
+      <p class="tema">Tema:</p>
+      <h1><span class="t-azul">Energía</span> <span class="t-verde">Hidráulica</span></h1>
+      <p class="bajada">Análisis del funcionamiento y la importancia de la energía hidráulica como fuente limpia y estable de electricidad</p>
+      <div class="acciones">
+        <a class="btn btn-prim" href="#simuladores">Ver simuladores 3D</a>
+        <a class="btn btn-sec" href="#funciona">¿Cómo funciona?</a>
+      </div>
+      <p class="datos-curso">9.º grado, sección «A» · Ñemby, Paraguay</p>
     </div>
+    <svg class="ola ola-1" aria-hidden="true"><use href="#ola"/></svg>
+    <svg class="ola ola-2" aria-hidden="true"><use href="#ola"/></svg>
   </header>
 
   <main>
-    <p>
-      Escaneá uno de los códigos QR con la cámara de tu celular (o tocá el botón
-      si ya estás viendo esto desde tu teléfono) para abrir el simulador 3D
-      interactivo: arrastrá para girar la cámara, movés los controles y mirás
-      las lecturas cambiar en vivo.
-    </p>
+    <!-- INTRODUCCIÓN -->
+    <section class="seccion" id="introduccion">
+      <h2 class="etiqueta azul">Introducción</h2>
+      <p class="texto">La búsqueda de fuentes limpias de energía es un reto urgente frente al impacto de los combustibles fósiles. El aprovechamiento del caudal de los ríos es una solución técnica clave para generar electricidad de forma constante. Este proyecto examina el funcionamiento, la infraestructura y el balance ambiental de la energía hidroeléctrica en la actualidad.</p>
+    </section>
 
-    <div class="cards">
-      <div class="card">
-        <h2>Motor / Turbina Hidráulica</h2>
-        <p>Simulador 3D interactivo: agua, rodete, generador y LED en tiempo real.</p>
-        <img class="qr" src="/assets/img/qr-motor.png" alt="QR para abrir el simulador de la turbina" />
-        <a class="btn" href="/motor-hidraulico.html">Ver página</a>
+    <!-- QUÉ ES -->
+    <section class="seccion destacado" id="que-es">
+      <div class="dos-col">
+        <div>
+          <h2 class="etiqueta verde">¿Qué es la energía hidráulica?</h2>
+          <p class="texto">Es una energía renovable y limpia que aprovecha la fuerza del agua en movimiento en ríos o caídas de agua. Transforma la energía acumulada por la altura y la velocidad de la corriente en electricidad útil para nuestras casas, sin quemar nada y sin contaminar el aire.</p>
+        </div>
+        <div class="icono-gota" aria-hidden="true">
+          <svg viewBox="0 0 120 120">
+            <defs><linearGradient id="g-gota" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5cc8ff"/><stop offset="1" stop-color="#0b6fd0"/></linearGradient></defs>
+            <path d="M52 8s30 32 30 54a30 30 0 0 1-60 0C22 40 52 8 52 8z" fill="url(#g-gota)"/>
+            <path d="M40 52c-4 8-4 16 2 22" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".55"/>
+            <path d="M80 44 62 76h14l-6 30 26-40H82l8-22z" fill="#ffd23f" stroke="#e6a400" stroke-width="2" stroke-linejoin="round"/>
+            <use href="#hoja" x="6" y="78" width="34" height="34" color="#3aa845"/>
+          </svg>
+        </div>
       </div>
+    </section>
 
-      <div class="card">
-        <h2>Represa de Itaipú</h2>
-        <p>Complejo completo y corte de una unidad, con datos reales de la central.</p>
-        <img class="qr" src="/assets/img/qr-itaipu.png" alt="QR para abrir el simulador de Itaipú" />
-        <a class="btn" href="/itaipu.html">Ver página</a>
+    <!-- CÓMO FUNCIONA -->
+    <section class="seccion" id="funciona">
+      <h2 class="etiqueta azul">¿Cómo funciona?</h2>
+      <p class="texto">El agua se junta en una represa, baja a toda velocidad por un tubo cerrado, choca contra las paletas de una turbina y la hace girar. La turbina mueve un generador que produce la electricidad, y esta viaja por cables hasta las ciudades.</p>
+
+      <ol class="pasos">
+        <li>
+          <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="14" width="18" height="44" rx="3" fill="#7a8794"/><path d="M22 20h10v38H22z" fill="#5cc8ff"/><path d="M24 22v34M28 22v34" stroke="#fff" stroke-width="2" opacity=".6"/><path d="M32 30c10 0 20 6 28 6v22H32z" fill="#2b9be0"/></svg>
+          <span class="num">1</span><b>Represa</b><small>El agua se acumula y gana altura.</small>
+        </li>
+        <li>
+          <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 14h14c8 0 12 6 12 14v8c0 8 4 12 12 12h10" stroke="#1d6fd1" stroke-width="12" fill="none" stroke-linecap="round"/><path d="M8 14h14c8 0 12 6 12 14v8c0 8 4 12 12 12h10" stroke="#7fd0ff" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="4 6"/></svg>
+          <span class="num">2</span><b>Tubería de presión</b><small>Baja con fuerza por el conducto.</small>
+        </li>
+        <li>
+          <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" fill="#3d4a57"/><g fill="#c8d2db"><path d="M32 32 30 8h4z"/><path d="M32 32 30 8h4z" transform="rotate(45 32 32)"/><path d="M32 32 30 8h4z" transform="rotate(90 32 32)"/><path d="M32 32 30 8h4z" transform="rotate(135 32 32)"/><path d="M32 32 30 8h4z" transform="rotate(180 32 32)"/><path d="M32 32 30 8h4z" transform="rotate(225 32 32)"/><path d="M32 32 30 8h4z" transform="rotate(270 32 32)"/><path d="M32 32 30 8h4z" transform="rotate(315 32 32)"/></g><circle cx="32" cy="32" r="7" fill="#1b2733"/></svg>
+          <span class="num">3</span><b>Turbina</b><small>El agua empuja las paletas y la hace girar.</small>
+        </li>
+        <li>
+          <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="16" width="38" height="32" rx="6" fill="#2b333c"/><path d="M14 22h30M14 28h30M14 34h30M14 40h30" stroke="#55606b" stroke-width="2"/><rect x="48" y="28" width="10" height="8" rx="2" fill="#8a96a2"/><path d="M30 6l-6 10h6l-3 9 9-12h-6l3-7z" fill="#ffd23f"/></svg>
+          <span class="num">4</span><b>Generador</b><small>Convierte el giro en electricidad.</small>
+        </li>
+        <li>
+          <svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="#2b333c" stroke-width="2.5" fill="none" stroke-linejoin="round"><path d="M18 60 24 8l6 52M14 20h20M16 32h16M20 20l8 12M28 20l-8 12"/><path d="M40 60l4-34 4 34M37 34h14"/></g><path d="M34 20c4 4 8 6 12 6" stroke="#1d6fd1" stroke-width="1.5" fill="none"/></svg>
+          <span class="num">5</span><b>Red eléctrica</b><small>Las líneas llevan la energía a las ciudades.</small>
+        </li>
+      </ol>
+    </section>
+
+    <!-- TURBINAS -->
+    <section class="seccion destacado" id="turbinas">
+      <h2 class="etiqueta azul">Tipos de turbinas</h2>
+      <p class="texto">Se eligen según la altura de caída y el volumen de agua disponible.</p>
+      <div class="turbinas">
+        <article class="turbina naranja">
+          <h3>Pelton</h3>
+          <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="20" fill="#5b6672"/><g fill="#8b97a3" stroke="#3d4650" stroke-width="1.5"><path id="cuchara" d="M50 6c7 0 10 6 9 12l-9 8-9-8c-1-6 2-12 9-12z"/><use href="#cuchara" transform="rotate(30 50 50)"/><use href="#cuchara" transform="rotate(60 50 50)"/><use href="#cuchara" transform="rotate(90 50 50)"/><use href="#cuchara" transform="rotate(120 50 50)"/><use href="#cuchara" transform="rotate(150 50 50)"/><use href="#cuchara" transform="rotate(180 50 50)"/><use href="#cuchara" transform="rotate(210 50 50)"/><use href="#cuchara" transform="rotate(240 50 50)"/><use href="#cuchara" transform="rotate(270 50 50)"/><use href="#cuchara" transform="rotate(300 50 50)"/><use href="#cuchara" transform="rotate(330 50 50)"/></g><circle cx="50" cy="50" r="6" fill="#2b333c"/></svg>
+          <p>Diseñada con cucharas dobles, para <b>grandes alturas</b> y <b>caudales pequeños</b>.</p>
+        </article>
+        <article class="turbina azul">
+          <h3>Francis</h3>
+          <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 10a40 40 0 1 1-40 40c0-10 6-18 14-22l30-12z" fill="#8b97a3" stroke="#3d4650" stroke-width="2"/><circle cx="50" cy="52" r="22" fill="#5b6672"/><g stroke="#c8d2db" stroke-width="3" fill="none" stroke-linecap="round"><path d="M50 52c0-12 6-18 14-20"/><path d="M50 52c12 0 18 6 20 14"/><path d="M50 52c0 12-6 18-14 20"/><path d="M50 52c-12 0-18-6-20-14"/></g><circle cx="50" cy="52" r="6" fill="#2b333c"/></svg>
+          <p>Flujo mixto (radial y axial), para <b>alturas</b> y <b>caudales intermedios</b>. Es la que usa Itaipú.</p>
+        </article>
+        <article class="turbina verde">
+          <h3>Kaplan</h3>
+          <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="#8b97a3" stroke="#3d4650" stroke-width="2"><path d="M50 50C40 30 42 10 56 8c10 4 6 26-6 42z"/><path d="M50 50C40 30 42 10 56 8c10 4 6 26-6 42z" transform="rotate(90 50 50)"/><path d="M50 50C40 30 42 10 56 8c10 4 6 26-6 42z" transform="rotate(180 50 50)"/><path d="M50 50C40 30 42 10 56 8c10 4 6 26-6 42z" transform="rotate(270 50 50)"/></g><circle cx="50" cy="50" r="11" fill="#5b6672" stroke="#3d4650" stroke-width="2"/></svg>
+          <p>Hélice de palas ajustables, para <b>caídas bajas</b> y <b>caudales muy grandes</b>.</p>
+        </article>
       </div>
-    </div>
+    </section>
+
+    <!-- REPRESAS -->
+    <section class="seccion" id="represas">
+      <h2 class="etiqueta azul">Represas del Paraguay</h2>
+      <p class="texto">Casi toda la electricidad del país sale de tres centrales hidroeléctricas.</p>
+      <div class="represas">
+        <article class="represa r-itaipu">
+          <div class="r-arte" aria-hidden="true">
+            <svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMax slice"><path d="M0 60c60-12 120-18 300-10v70H0z" fill="#3aa845"/><path d="M0 52h300v16H0z" fill="#2a8fd6"/><path d="M20 66l260-8 6 26-272 10z" fill="#c9ced3"/><g fill="#9aa3ab"><path d="M40 70h8v22h-8zM70 69h8v22h-8zM100 68h8v22h-8zM130 67h8v22h-8zM160 66h8v22h-8zM190 65h8v22h-8zM220 64h8v22h-8zM250 63h8v22h-8z"/></g><path d="M0 98c80-6 200-6 300 0v22H0z" fill="#1f6fb5"/><path d="M30 100c40-4 80-4 120 0" stroke="#fff" stroke-width="3" opacity=".5" fill="none"/></svg>
+          </div>
+          <div class="r-txt"><h3>Itaipú</h3><p>Sobre el río Paraná, compartida con Brasil. 20 unidades generadoras con turbinas Francis.</p></div>
+        </article>
+        <article class="represa r-yacyreta">
+          <div class="r-arte" aria-hidden="true">
+            <svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMax slice"><path d="M0 50h300v20H0z" fill="#2a8fd6"/><path d="M0 46c80-6 200-8 300-4v8H0z" fill="#3aa845"/><path d="M0 70h300v12H0z" fill="#c9ced3"/><g fill="#8a6a4a"><path d="M10 64h10v20H10zM40 64h10v20H40zM70 64h10v20H70zM100 64h10v20h-10zM130 64h10v20h-10zM160 64h10v20h-10zM190 64h10v20h-10zM220 64h10v20h-10zM250 64h10v20h-10zM280 64h10v20h-10z"/></g><path d="M0 84h300v36H0z" fill="#e8f4fb"/><path d="M0 92c50-6 100 6 150 0s100-6 150 0M0 106c50-6 100 6 150 0s100-6 150 0" stroke="#9fd2f2" stroke-width="4" fill="none"/></svg>
+          </div>
+          <div class="r-txt"><h3>Yacyretá</h3><p>Sobre el río Paraná, compartida con Argentina. Río ancho y caída baja: turbinas Kaplan.</p></div>
+        </article>
+        <article class="represa r-acaray">
+          <div class="r-arte" aria-hidden="true">
+            <svg viewBox="0 0 300 120" preserveAspectRatio="xMidYMax slice"><rect width="300" height="120" fill="#1b2b4a"/><path d="M0 40c60-10 140-14 300-6v30H0z" fill="#2c5f8f"/><path d="M0 34c60-8 120-10 160-6l-20 20H0z" fill="#1f5a2c"/><path d="M120 60h120v40H120z" fill="#c9ced3"/><g fill="#ffd23f"><circle cx="140" cy="56" r="2.5"/><circle cx="170" cy="56" r="2.5"/><circle cx="200" cy="56" r="2.5"/><circle cx="230" cy="56" r="2.5"/></g><path d="M90 64h30v40H90z" fill="#e8f4fb" opacity=".85"/><path d="M0 100h300v20H0z" fill="#2a8fd6"/></svg>
+          </div>
+          <div class="r-txt"><h3>Acaray</h3><p>Sobre el río Acaray, en Alto Paraná. Es la primera hidroeléctrica del país, 100 % paraguaya.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- SIMULADORES -->
+    <section class="seccion simuladores" id="simuladores">
+      <h2 class="etiqueta blanca">Simuladores 3D interactivos</h2>
+      <p class="texto">Abrí un simulador y movelo con el dedo: girá la cámara, abrí las compuertas y mirá cómo se enciende la luz.</p>
+      <div class="sims">
+        <a class="sim" href="/motor-hidraulico.html">
+          <span class="sim-ico" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="3"/><path d="M24 24 22 8h4zM24 24l16-2v4zM24 24l2 16h-4zM24 24 8 26v-4z" fill="currentColor"/></svg></span>
+          <span class="sim-txt"><b>Motor / turbina hidráulica</b><small>Agua, rodete, generador y LED en tiempo real</small></span>
+          <img class="qr" src="/assets/img/qr-motor.png" alt="Código QR del simulador de la turbina" loading="lazy" width="140" height="140" />
+          <span class="sim-ir">Abrir simulador →</span>
+        </a>
+        <a class="sim" href="/itaipu.html">
+          <span class="sim-ico" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M4 30h40v12H4z" fill="currentColor" opacity=".45"/><path d="M6 18h36l-3 14H9z" fill="currentColor"/><path d="M12 22v8M18 22v8M24 22v8M30 22v8M36 22v8" stroke="#0b4ea2" stroke-width="2"/></svg></span>
+          <span class="sim-txt"><b>Represa de Itaipú</b><small>Complejo completo y corte de una unidad</small></span>
+          <img class="qr" src="/assets/img/qr-itaipu.png" alt="Código QR del simulador de Itaipú" loading="lazy" width="140" height="140" />
+          <span class="sim-ir">Abrir simulador →</span>
+        </a>
+      </div>
+      <p class="nota-qr">Desde la computadora: escaneá el código QR con la cámara del celular.</p>
+    </section>
+
+    <!-- CONCLUSIÓN -->
+    <section class="seccion" id="conclusion">
+      <h2 class="etiqueta verde">Conclusión</h2>
+      <p class="texto">La energía hidráulica es una de las principales fuentes de energía renovable. Su valor está en transformar el movimiento del agua en electricidad y en ayudar a mantener estable la red. Aprovecharla de manera responsable es fundamental para proteger los ríos, la biodiversidad y las comunidades.</p>
+      <p class="lema">Energía para el futuro,<br />con responsabilidad</p>
+    </section>
+
+    <!-- INTEGRANTES -->
+    <section class="seccion destacado" id="integrantes">
+      <h2 class="etiqueta azul">Integrantes</h2>
+      <ul class="equipo">
+        <li>Aguilar Thamara</li>
+        <li>Amarilla Clara</li>
+        <li>Álvarez Milagros</li>
+        <li>Ayala Alan</li>
+        <li>Espínola William</li>
+        <li>Giménez Lucía</li>
+        <li>Leguizamón Jonathan</li>
+        <li>López Zaira</li>
+        <li>Pesoa Francisco</li>
+        <li>Ramírez Luján</li>
+      </ul>
+      <dl class="creditos">
+        <div><dt>Curso</dt><dd>9.º grado, sección «A»</dd></div>
+        <div><dt>Profesora</dt><dd>Lic. Carol Ruth Arce</dd></div>
+        <div><dt>Director general</dt><dd>Prof. M. Sc. Simón Francisco Ruiz Díaz Vicezar</dd></div>
+      </dl>
+    </section>
   </main>
 
-  <footer class="site">
-    Colegio Nacional EMD Miguel Ángel Rodríguez · 9.º grado · Sección A<br />
-    Área: Ciencias Naturales · Asesora: Lic. Carol Ruth Arce<br />
-    Ñemby — Paraguay · 2026
+  <footer class="pie">
+    <svg class="ola" aria-hidden="true"><use href="#ola"/></svg>
+    <div class="pie-in">
+      <strong>Colegio Nacional EMD Miguel Ángel Rodríguez</strong>
+      <span>Feria de Ciencias · Ñemby, Paraguay · 2026</span>
+    </div>
   </footer>
 </body>
 </html>

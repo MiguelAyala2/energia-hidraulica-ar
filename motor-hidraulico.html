@@ -23,6 +23,20 @@
   --f-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
+:root[data-theme="light"] {
+  --bg: #eef3f8;
+  --panel: #ffffff;
+  --panel-2: #eef2f7;
+  --line: #d7e1ea;
+  --fg: #1b2733;
+  --muted: #5a6b7a;
+  --water: #0a7fc2;
+  --accent: #c8780a;
+  --ok: #1f9d6b;
+  --stage-top: #cfe3f2;
+  --stage-bot: #eef3f8;
+  --tag-bg: rgba(255, 255, 255, 0.85);
+}
 * { box-sizing: border-box; }
 body {
   margin: 0;
@@ -32,9 +46,18 @@ body {
   padding-block: 20px 44px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
+  transition: background .25s, color .25s;
 }
-.backlink { display: inline-block; margin: 0 0 14px; color: var(--muted); font: 500 12px/1 var(--f-mono); text-decoration: none; }
+.backlink { display: inline-block; margin: 0; color: var(--muted); font: 500 12px/1 var(--f-mono); text-decoration: none; }
 .backlink:hover { color: var(--water); }
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.logos {
+  background: #fff; border: 1px solid var(--line); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: 1rem 1.6rem; padding: 0.8rem 1rem;
+}
+.logos img { height: 34px; width: auto; object-fit: contain; }
+.logos img.escudo { height: 48px; }
 .wrap { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 .top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 36px; }
 .top > div { min-width: 0; }
@@ -118,7 +141,16 @@ select { font: 400 13px/1.2 var(--f-body); color: var(--fg); background: var(--p
 </style>
 
 <div class="wrap">
-  <a class="backlink" href="/index.html">← Volver al inicio</a>
+  <div class="topbar">
+    <a class="backlink" href="/index.html">← Volver al inicio</a>
+    <button id="themeToggle" class="chip" type="button">☀️ Modo claro</button>
+  </div>
+
+  <div class="logos">
+    <img src="/assets/img/logo-gobierno.png" alt="Gobierno del Paraguay" />
+    <img src="/assets/img/escudo-colegio.png" alt="Colegio Nacional EMD Miguel Ángel Rodríguez" class="escudo" />
+    <img src="/assets/img/logo-mec.png" alt="Ministerio de Educación y Ciencias" />
+  </div>
 
   <header class="top">
     <div>
@@ -223,6 +255,24 @@ var camera = new THREE.PerspectiveCamera(42, 1.6, 0.1, 500);
 scene.add(new THREE.HemisphereLight(0xbcd8ff, 0x1a2a38, 0.8));
 var sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(20, 35, 25); scene.add(sun);
 var rimLight = new THREE.DirectionalLight(0x6fb6ff, 0.4); rimLight.position.set(-25, 10, -20); scene.add(rimLight);
+
+/* ---------- modo claro / oscuro ---------- */
+(function () {
+  var htmlEl = document.documentElement;
+  var btn = $('themeToggle');
+  function applyTheme(light) {
+    htmlEl.setAttribute('data-theme', light ? 'light' : 'dark');
+    if (btn) btn.textContent = light ? '🌙 Modo oscuro' : '☀️ Modo claro';
+    var bg = light ? 0xcfe3f2 : 0x0b1824;
+    scene.background = new THREE.Color(bg);
+    scene.fog.color = new THREE.Color(bg);
+    try { localStorage.setItem('tema-hidraulica', light ? 'light' : 'dark'); } catch (e) {}
+  }
+  var prefLight = false;
+  try { prefLight = localStorage.getItem('tema-hidraulica') === 'light'; } catch (e) {}
+  if (btn) btn.addEventListener('click', function () { applyTheme(htmlEl.getAttribute('data-theme') !== 'light'); });
+  applyTheme(prefLight);
+})();
 
 /* ---------- materiales ---------- */
 function M(c, o) { return new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.45, metalness: 0.55 }, o || {})); }
