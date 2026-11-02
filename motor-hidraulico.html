@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b3fae" />
-  <meta name="description" content="Simulador 3D interactivo de una turbina Francis de Itaipú: abrí las compuertas y mirá el caudal, la velocidad, la frecuencia, la potencia y el LED que se enciende con la electricidad generada." />
+  <meta name="description" content="Simulador 3D interactivo de una turbina Francis de Itaipú: abrí las compuertas y mirá el caudal, la velocidad, la frecuencia, la potencia y la energía que viaja por las líneas de transmisión hasta las casas." />
   <title>Simulador 3D · Turbina Francis de Itaipú</title>
   <script>try { if (localStorage.getItem('tema-simulador') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -79,7 +79,7 @@
         <h1><span class="t-navy">Turbina Francis</span> <span class="t-verde">de Itaipú</span></h1>
         <svg class="rama" aria-hidden="true"><use href="#rama"/></svg>
       </div>
-      <p class="bajada">El agua baja del embalse por la tubería forzada, entra al caracol, empuja los álabes del rodete y sale por el tubo de aspiración. El eje hace girar el generador y la electricidad enciende el LED.</p>
+      <p class="bajada">El agua baja del embalse por la tubería forzada, entra al caracol, empuja los álabes del rodete y sale por el tubo de aspiración. El eje hace girar el generador y la electricidad viaja por las líneas de transmisión hasta las casas.</p>
       <ul class="datos-sim">
         <li><svg aria-hidden="true"><use href="#i-rayo"/></svg>≈ 700 MW por unidad</li>
         <li><svg aria-hidden="true"><use href="#i-gota"/></svg>≈ 645 m³/s</li>
@@ -104,7 +104,7 @@
             <div class="views" role="group" aria-label="Encuadres de la cámara">
               <button class="chip" type="button" data-view="all">Conjunto</button>
               <button class="chip" type="button" data-view="turbine">Turbina</button>
-              <button class="chip" type="button" data-view="gen">Generador y LED</button>
+              <button class="chip" type="button" data-view="gen">Generador y red</button>
             </div>
             <p class="hint">Arrastrá para girar · pellizcá o usá la rueda para acercar</p>
             <div class="fallback" id="fallback" hidden>No se pudo iniciar la vista 3D. Revisá que tu navegador tenga WebGL activado o probá con otro.</div>
@@ -128,7 +128,7 @@
               <div><dt>Potencia</dt><dd><span id="rMW">0</span><small>MW</small></dd></div>
             </dl>
             <div class="led">
-              <div class="led-top"><span><svg class="ico" aria-hidden="true"><use href="#i-rayo"/></svg>LED</span><b id="ledTxt">Apagado</b></div>
+              <div class="led-top"><span><svg class="ico" aria-hidden="true"><use href="#i-rayo"/></svg>Red eléctrica</span><b id="ledTxt">Sin energía</b></div>
               <div class="barra-led"><i id="ledBar"></i></div>
             </div>
           </section>
@@ -147,7 +147,7 @@
           </section>
         </aside>
       </div>
-      <p class="nota-ref">Referencia: cada unidad de Itaipú entrega unos 700 MW con un caudal cercano a 645 m³/s y un salto de unos 118 m (valores aproximados). La maqueta no está a escala real y el LED hace de carga. La cámara lenta solo afecta lo que ves girar; las lecturas muestran la velocidad real.</p>
+      <p class="nota-ref">Referencia: cada unidad de Itaipú entrega unos 700 MW con un caudal cercano a 645 m³/s y un salto de unos 118 m (valores aproximados). La maqueta no está a escala real; las casas representan el consumo de la red. La cámara lenta solo afecta lo que ves girar; las lecturas muestran la velocidad real.</p>
     </section>
 
     <section class="seccion" id="recorrido">
@@ -162,8 +162,8 @@
           <li><b>Tubo de aspiración</b><span>Se ensancha para frenar el agua y devolverla al río sin desperdiciar desnivel.</span></li>
           <li><b>Canal de fuga</b><span>El agua turbinada vuelve al cauce, aguas abajo de la central.</span></li>
           <li class="r-gen"><b>Eje y generador</b><span>El eje vertical gira el rotor, con sus polos magnéticos, frente al estator. Ese movimiento induce corriente en las bobinas de cobre.</span></li>
-          <li class="r-elec"><b>Cable</b><span>Conduce la corriente desde el estator hasta el consumo.</span></li>
-          <li class="r-elec"><b>LED</b><span>Se enciende cuando la potencia pasa su umbral y brilla más a medida que sube.</span></li>
+          <li class="r-elec"><b>Cable</b><span>Conduce la corriente desde el estator hasta el transformador.</span></li>
+          <li class="r-elec"><b>Líneas de transmisión</b><span>Un transformador eleva la tensión y los cables de alta tensión, sostenidos por torres, llevan la energía a la red. Las casas se iluminan cuando llega la electricidad.</span></li>
         </ol>
         <ul class="leyenda" aria-label="Referencias de color">
           <li>Recorrido del agua</li>
@@ -449,41 +449,102 @@ var bankM = M(0x15283a, { roughness: 0.9, metalness: 0 });
 var bR = new THREE.Mesh(new THREE.BoxGeometry(24, 8, 8), bankM); bR.position.set(24, -6.6, 11); scene.add(bR);
 var bL = new THREE.Mesh(new THREE.BoxGeometry(24, 8, 8), bankM); bL.position.set(24, -6.6, -11); scene.add(bL);
 
-/* ---------- cable, LED y luz ---------- */
-var LED_POS = new THREE.Vector3(14, 2.4, 10);
-var cableCurve = new THREE.CatmullRomCurve3([[2.72, 5.3, 3.89], [3.8, 7.2, 5.6], [7.5, 7.4, 8], [12, 5.2, 9.6], [14, 3.2, 10], [14, 2.5, 10]]
-  .map(function (p) { return new THREE.Vector3(p[0], p[1], p[2]); }), false, 'catmullrom', 0.5);
-scene.add(new THREE.Mesh(new THREE.TubeGeometry(cableCurve, 60, 0.07, 8, false), M(0x2a3039, { roughness: 0.6, metalness: 0.2 })));
-var cableS = []; for (var ci = 0; ci <= 80; ci++) cableS.push(cableCurve.getPointAt(ci / 80));
-var dotGeo = new THREE.SphereGeometry(0.13, 10, 8), dotMat = new THREE.MeshBasicMaterial({ color: 0xffc766, transparent: true, opacity: 0.95 });
-var dots = []; for (var di = 0; di < 16; di++) { var dm = new THREE.Mesh(dotGeo, dotMat); dm.visible = false; scene.add(dm); dots.push(dm); }
-
-(function buildLed() {
-  var post = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 5, 16), M(0x4a5866));
-  post.position.set(14, -0.1, 10); scene.add(post);
-  var base = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 1.05, 0.3, 32), M(0x3a4654));
-  base.position.set(14, -2.45, 10); scene.add(base);
-})();
-var domePts = [[0, 0], [0.78, 0], [0.78, 0.1], [0.62, 0.1], [0.62, 0.8]];
-for (var da = 0.1; da <= PI / 2 + 0.001; da += PI / 24) domePts.push([0.62 * Math.cos(da), 0.8 + 0.62 * Math.sin(da)]);
-var domeMat = new THREE.MeshStandardMaterial({ color: 0xf1ece2, emissive: 0xffd9a0, emissiveIntensity: 0.05, transparent: true, opacity: 0.9, roughness: 0.2, metalness: 0 });
-var dome = lathe(domePts, 36, domeMat); dome.position.copy(LED_POS); scene.add(dome);
-var chipMat = new THREE.MeshStandardMaterial({ color: 0xfff3d6, emissive: 0xffe2a8, emissiveIntensity: 0.05 });
-var chip = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 0.22), chipMat); chip.position.set(14, 2.4 + 0.5, 10); scene.add(chip);
-[-0.14, 0.14].forEach(function (dx) {
-  var leg = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.55, 8), M(0xc9ced3, { metalness: 0.9, roughness: 0.3 }));
-  leg.position.set(14 + dx, 2.4 + 0.3, 10); scene.add(leg);
-});
-function glowTexture() {
-  var c = document.createElement('canvas'); c.width = 128; c.height = 128;
-  var x = c.getContext('2d'), g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
-  g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.25, 'rgba(255,255,255,0.55)'); g.addColorStop(1, 'rgba(255,255,255,0)');
-  x.fillStyle = g; x.fillRect(0, 0, 128, 128);
-  return new THREE.CanvasTexture(c);
+/* ---------- cable, transformador, líneas de transmisión y casas ----------
+   Todo se apoya en la orilla cercana del río (x 12..36, z 7..15, suelo en y = -2,6). */
+var BANK_Y = -2.6;
+var steelTw = M(0x9aa6b2, { roughness: 0.45, metalness: 0.6 });
+var porcelain = M(0xe4e8ec, { roughness: 0.35, metalness: 0.05 });
+var wireMat = new THREE.LineBasicMaterial({ color: 0x6b7885 });
+var Y_UP = new THREE.Vector3(0, 1, 0);
+function V(x, y, z) { return new THREE.Vector3(x, y, z); }
+function barra(parent, a, b, r, mat) {
+  var d = b.clone().sub(a), m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 6), mat);
+  m.position.copy(a).addScaledVector(d, 0.5); m.quaternion.setFromUnitVectors(Y_UP, d.normalize()); parent.add(m); return m;
 }
-var glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: 0xffcf8a, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
-glow.position.set(14, 3.2, 10); scene.add(glow);
-var ledLight = new THREE.PointLight(0xffe2b0, 0, 32, 2); ledLight.position.set(14, 3.4, 10); scene.add(ledLight);
+/* cable con comba: parábola entre dos puntos de anclaje */
+function comba(a, b, sag, n) {
+  var pts = [];
+  for (var i = 0; i <= n; i++) { var t = i / n, p = a.clone().lerp(b, t); p.y -= sag * 4 * t * (1 - t); pts.push(p); }
+  return pts;
+}
+function linea(pts) { scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat)); }
+
+/* cable de baja tensión: del estator al transformador */
+var cableCurve = new THREE.CatmullRomCurve3([[2.72, 5.3, 3.89], [3.8, 7.2, 5.6], [7.5, 7.4, 8], [11.2, 4.0, 10.4], [13.0, 0.4, 10.8], [13.5, -0.9, 10.8]]
+  .map(function (p) { return V(p[0], p[1], p[2]); }), false, 'catmullrom', 0.5);
+scene.add(new THREE.Mesh(new THREE.TubeGeometry(cableCurve, 60, 0.07, 8, false), M(0x2a3039, { roughness: 0.6, metalness: 0.2 })));
+
+/* transformador elevador */
+var TF = V(14.8, BANK_Y, 10.8);
+(function buildTransformer() {
+  var g = new THREE.Group(); g.position.copy(TF); scene.add(g);
+  var plinth = new THREE.Mesh(new THREE.BoxGeometry(3.0, 0.3, 2.4), M(0x9aa1a8, { roughness: 0.9, metalness: 0 })); plinth.position.y = 0.15; g.add(plinth);
+  var tankM = M(0x6c8191, { roughness: 0.5, metalness: 0.4 });
+  var tank = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.0, 1.7), tankM); tank.position.y = 1.3; g.add(tank);
+  for (var r = 0; r < 5; r++) { var fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.5, 0.6), tankM); fin.position.set(-0.9 + r * 0.45, 1.25, 1.15); g.add(fin); }
+  var cons = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.6, 16), tankM); cons.rotation.z = PI / 2; cons.position.set(0, 2.65, -0.45); g.add(cons);
+  [-0.6, 0, 0.6].forEach(function (dx) {
+    var b = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.13, 1.0, 10), porcelain); b.position.set(dx, 2.8, 0.2); g.add(b);
+  });
+  var lv = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.5), tankM); lv.position.set(-1.3, 1.7, 0); g.add(lv);
+})();
+
+/* torre de alta tensión de celosía: 4 patas, travesaños, cruceta y aisladores */
+var ARM_Z = [-1.8, 0, 1.8];
+function torre(x, z, h, baseY) {
+  var g = new THREE.Group(); g.position.set(x, baseY, z); scene.add(g);
+  var bw = 1.2, tw = 0.42, hb = h - 1.3, lattice = [];
+  function corner(k, y) { var w = lerp(bw, tw, y / hb); return V((k & 1 ? 1 : -1) * w, y, (k & 2 ? 1 : -1) * w); }
+  [0, 1, 3, 2].forEach(function (k) { barra(g, corner(k, 0), corner(k, hb), 0.07, steelTw); });
+  var levels = [0.3, hb * 0.28, hb * 0.52, hb * 0.74, hb];
+  levels.forEach(function (y) { [[0, 1], [1, 3], [3, 2], [2, 0]].forEach(function (e) { barra(g, corner(e[0], y), corner(e[1], y), 0.045, steelTw); }); });
+  for (var l = 0; l < levels.length - 1; l++) {
+    [[0, 1], [1, 3], [3, 2], [2, 0]].forEach(function (e) {
+      lattice.push(corner(e[0], levels[l]), corner(e[1], levels[l + 1]), corner(e[1], levels[l]), corner(e[0], levels[l + 1]));
+    });
+  }
+  g.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(lattice), new THREE.LineBasicMaterial({ color: 0x8794a1 })));
+  var arm = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.28, 4.6), steelTw); arm.position.y = hb + 0.3; g.add(arm);
+  [0, 1, 2, 3].forEach(function (k) { barra(g, corner(k, hb), V(0, h + 0.4, 0), 0.05, steelTw); });
+  ARM_Z.forEach(function (dz) { barra(g, V(0, hb + 0.2, dz), V(0, hb - 0.75, dz), 0.1, porcelain); });
+  return function (i) { return V(x, baseY + hb - 0.8, z + ARM_Z[i]); };
+}
+var TOWER_H = 10.9;
+var torreA = torre(20.2, 12.6, TOWER_H, BANK_Y), torreB = torre(27.4, 12.6, TOWER_H, BANK_Y);
+
+/* tres conductores: transformador -> torre A -> torre B */
+var bushings = [-0.6, 0, 0.6].map(function (dx) { return V(TF.x + dx, TF.y + 3.3, TF.z + 0.2); });
+var hvPath = [];
+[0, 1, 2].forEach(function (i) {
+  var s1 = comba(bushings[i], torreA(i), 0.35, 24), s2 = comba(torreA(i), torreB(i), 0.9, 32);
+  linea(s1); linea(s2);
+  if (i === 1) hvPath = s1.concat(s2.slice(1));
+});
+
+/* poste de distribución y casas: el consumo que se ilumina */
+var POLE = V(30.2, BANK_Y, 11.0), POLE_TOP = V(30.2, 2.0, 11.0);
+barra(scene, POLE, POLE_TOP, 0.12, M(0x7a5a3c, { roughness: 0.9, metalness: 0 }));
+barra(scene, V(30.2, 1.7, 10.3), V(30.2, 1.7, 11.7), 0.06, steelTw);
+var drop = comba(torreB(1), POLE_TOP, 0.4, 20); linea(drop);
+var winMat = new THREE.MeshStandardMaterial({ color: 0x3e4b58, emissive: 0xffd36b, emissiveIntensity: 0.05, roughness: 0.4 });
+var wallM = M(0xf1e3c8, { roughness: 0.85, metalness: 0 }), roofM = M(0xb5523b, { roughness: 0.8, metalness: 0 });
+var HOUSES = [[32.0, 8.9], [34.7, 9.3], [32.2, 13.0], [34.9, 12.7]];
+HOUSES.forEach(function (hp) {
+  var g = new THREE.Group(); g.position.set(hp[0], BANK_Y, hp[1]); scene.add(g);
+  var wall = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.4, 1.8), wallM); wall.position.y = 0.7; g.add(wall);
+  var roof = new THREE.Mesh(new THREE.ConeGeometry(1.55, 1.0, 4), roofM); roof.rotation.y = PI / 4; roof.position.y = 1.9; g.add(roof);
+  [-0.5, 0.5].forEach(function (dx) { var w = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.4, 0.06), winMat); w.position.set(dx, 0.85, 0.92); g.add(w); });
+  var side = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.4, 0.45), winMat); side.position.set(1.02, 0.85, 0); g.add(side);
+  linea(comba(POLE_TOP, V(hp[0], BANK_Y + 1.5, hp[1]), 0.15, 10));
+});
+var townLight = new THREE.PointLight(0xffd59a, 0, 14, 2); townLight.position.set(33.4, 1.2, 11); scene.add(townLight);
+
+/* recorrido de la energía para los puntos animados: cable, línea de alta tensión, bajada y casa */
+var cableS = [];
+for (var ci = 0; ci <= 70; ci++) cableS.push(cableCurve.getPointAt(ci / 70));
+cableS = cableS.concat(comba(V(13.5, -0.9, 10.8), bushings[1], 0, 6), hvPath, drop.slice(1), comba(POLE_TOP, V(32.2, BANK_Y + 1.5, 13.0), 0.15, 8));
+var dotGeo = new THREE.SphereGeometry(0.16, 10, 8), dotMat = new THREE.MeshBasicMaterial({ color: 0xffb000, transparent: true, opacity: 0.95 });
+var dots = []; for (var di = 0; di < 30; di++) { var dm = new THREE.Mesh(dotGeo, dotMat); dm.visible = false; scene.add(dm); dots.push(dm); }
 
 /* ---------- partículas de agua ---------- */
 function sampleAll(curve, n) {
@@ -625,7 +686,7 @@ for (var wi = 0; wi < 520; wi++) stepParticles(0.05, 1);
 var LABELS = [
   [1, 'Embalse', -37, 13.6, 5.4], [2, 'Tubería forzada', -16, 7.4, 5.4], [3, 'Caracol', 5.2, 2.4, 0.5], [4, 'Distribuidor', -2.9, 1.1, 0],
   [5, 'Rodete', 1.9, -1.2, 1.4], [6, 'Tubo de aspiración', 4.2, -5.2, 0], [7, 'Canal de fuga', 24, -2.4, 0],
-  [8, 'Generador', 4.9, 6.7, 0], [9, 'Cable', 8.2, 7.9, 8], [10, 'LED', 14, 4.6, 10]
+  [8, 'Generador', 4.9, 6.7, 0], [9, 'Cable', 12.4, 1.6, 10.7], [10, 'Líneas de transmisión', 20.2, 9.3, 12.6]
 ];
 var labelsEl = $('labels'), tagEls = LABELS.map(function (l) {
   var d = document.createElement('div'); d.className = 'tag';
@@ -654,7 +715,7 @@ function applyCam() {
 var PRESETS = {
   all: { t: [-4, 1.5, 4], theta: 0.45, phi: 1.2, dist: function () { return clamp(64 * Math.max(1, 1.5 / camera.aspect), 40, 150); } },
   turbine: { t: [0, 0.2, 0], theta: 0.6, phi: 1.28, dist: function () { return clamp(17 * Math.max(1, 1.3 / camera.aspect), 12, 40); } },
-  gen: { t: [9, 4.5, 5], theta: 0.35, phi: 1.3, dist: function () { return clamp(27 * Math.max(1, 1.4 / camera.aspect), 18, 60); } }
+  gen: { t: [21, 2, 10], theta: 0.28, phi: 1.22, dist: function () { return clamp(37 * Math.max(1, 1.4 / camera.aspect), 24, 85); } }
 };
 var tween = null;
 function goTo(name) {
@@ -737,17 +798,15 @@ function update(dt) {
 
   var ledT = clamp((P - 0.1) / 0.5, 0, 1); ledT = Math.pow(ledT, 0.8);
   ledS += (ledT - ledS) * (1 - Math.exp(-dt * 6));
-  domeMat.emissiveIntensity = 0.05 + 2.1 * ledS;
-  chipMat.emissiveIntensity = 0.05 + 2.4 * ledS;
-  glow.material.opacity = ledS * 0.85; glow.scale.setScalar(1.5 + 8 * ledS);
-  ledLight.intensity = 3.2 * ledS;
+  winMat.emissiveIntensity = 0.05 + 2.2 * ledS;
+  townLight.intensity = 2.6 * ledS;
   copperMat.emissiveIntensity = 0.75 * P * (0.82 + 0.18 * Math.sin(simT * 22));
 
   eT += dt * (0.08 + 0.7 * P);
   var on = P > 0.03;
   for (var i = 0; i < dots.length; i++) {
     var d = dots[i]; d.visible = on;
-    if (on) { var u = (i / dots.length + eT) % 1, c = cableS[Math.min(80, Math.floor(u * 80))]; d.position.copy(c); }
+    if (on) { var u = (i / dots.length + eT * 0.6) % 1, c = cableS[Math.min(cableS.length - 1, Math.floor(u * cableS.length))]; d.position.copy(c); }
   }
 
   tRead -= dt;
@@ -759,7 +818,7 @@ function update(dt) {
     rHz.textContent = nf1.format(rpm * nom.poles / 120);
     rMW.textContent = nf0.format(700 * P);
     var pct = Math.round(ledS * 100);
-    ledTxt.textContent = pct > 1 ? 'Encendido · ' + pct + ' %' : 'Apagado';
+    ledTxt.textContent = pct > 1 ? 'Con energía · ' + pct + ' %' : 'Sin energía';
     ledTxt.className = pct > 1 ? 'on' : '';
     ledBar.style.width = pct + '%';
   }
