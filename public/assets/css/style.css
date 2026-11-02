@@ -1,6 +1,7 @@
 :root {
   --azul: #0a5ca8;
   --azul-oscuro: #073c6e;
+  --azul-cian: #1ea7e0;
   --celeste: #e8f3fb;
   --texto: #1b2733;
   --gris: #5a6b7a;
@@ -19,15 +20,60 @@ body {
 }
 
 header.site {
-  background: var(--azul);
   color: white;
-  padding: 1.5rem 1rem;
   text-align: center;
 }
 
+.logos {
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  padding: 0.9rem 1rem;
+}
+
+.logos img {
+  height: 46px;
+  width: auto;
+  object-fit: contain;
+}
+
+.logos img.escudo {
+  height: 64px;
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--azul-oscuro), var(--azul) 55%, var(--azul-cian));
+  padding: 2.2rem 1rem 2rem;
+}
+
+.hero .eyebrow {
+  display: inline-block;
+  margin: 0 0 0.9rem;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 header.site h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.4rem;
+  margin: 0 0 0.6rem;
+  font-size: clamp(1.9rem, 6vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.hero .subtitulo {
+  margin: 0 auto;
+  max-width: 44ch;
+  font-size: 0.95rem;
+  opacity: 0.92;
+  line-height: 1.5;
 }
 
 header.site p {
@@ -144,4 +190,5 @@ footer.site {
   color: var(--gris);
   font-size: 0.8rem;
   padding: 1.5rem 1rem;
+  line-height: 1.6;
 }
