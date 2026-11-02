@@ -288,7 +288,7 @@ main { padding-bottom: 1rem; }
   background: #fff; color: var(--c); font: 900 1rem/1 var(--f-tit);
 }
 .turbina h3 { margin: 0; font: 800 1.25rem/1 var(--f-tit); }
-.turbina .dibujo { width: 104px; height: 104px; margin: 1rem auto .5rem; }
+.turbina .foto-tur { width: 160px; height: auto; margin: 1rem auto .6rem; border-radius: 12px; mix-blend-mode: multiply; }
 .turbina p { margin: 0 1rem .9rem; font-size: 1rem; }
 .chips { display: grid; gap: .45rem; margin: auto 1rem 1rem; }
 .chips div {
@@ -319,7 +319,7 @@ main { padding-bottom: 1rem; }
 .r-lugar .ico { margin-top: .15em; color: var(--c); }
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin: 0; }
 .stats div { padding: .55rem .7rem; border-radius: 12px; background: var(--celeste); }
-.stats dt { font: 700 .72rem/1.2 var(--f-tit); letter-spacing: .05em; text-transform: uppercase; color: var(--texto-suave); }
+.stats dt { font: 700 .75rem/1.2 var(--f-tit); letter-spacing: .05em; text-transform: uppercase; color: var(--texto-suave); }
 .stats dd { margin: .2rem 0 0; font: 900 1.25rem/1.1 var(--f-tit); color: var(--navy); }
 .stats dd small { font: 700 .78rem var(--f-txt); color: var(--texto-suave); }
 .r-mas {
@@ -332,6 +332,73 @@ main { padding-bottom: 1rem; }
 .rep-verde { --c: var(--verde); }
 .rep-navy { --c: var(--navy); }
 .nota { margin: 1rem 0 0; font-size: .86rem; color: var(--texto-suave); }
+
+/* ---------- listas con íconos de color (partes, ventajas, desventajas) ---------- */
+.ic-azul { --c: var(--azul); }
+.ic-verde { --c: var(--verde); }
+.ic-naranja { --c: var(--naranja); }
+.ic-violeta { --c: var(--violeta); }
+.ic-rojo { --c: var(--rojo); }
+.items { list-style: none; margin: 0; padding: 0; display: grid; gap: .7rem; }
+.items li {
+  display: grid; grid-template-columns: 3.5rem 1fr; align-items: center; gap: .9rem;
+  padding: .8rem .9rem; border-radius: 16px;
+  background: linear-gradient(90deg, var(--celeste), #f7fbff);
+}
+.circulo {
+  display: grid; place-items: center; width: 3.5rem; height: 3.5rem; border-radius: 50%;
+  background: var(--c, var(--azul)); color: #fff;
+  box-shadow: 0 8px 16px -10px var(--c, var(--azul));
+}
+.circulo svg { width: 1.85rem; height: 1.85rem; }
+.items b { display: block; font: 800 1.08rem/1.25 var(--f-tit); color: var(--c, var(--azul)); }
+.items p { margin: .2rem 0 0; font-size: 1rem; line-height: 1.5; }
+@media (min-width: 760px) {
+  .items-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .items-3 li { grid-template-columns: 1fr; justify-items: center; align-content: start; text-align: center; padding: 1.2rem 1rem; }
+  .items-3 .circulo { width: 4.2rem; height: 4.2rem; }
+  .items-3 .circulo svg { width: 2.2rem; height: 2.2rem; }
+}
+
+/* ---------- tipos de centrales ---------- */
+.subcab {
+  --c: var(--azul);
+  margin: 1.6rem 0 .8rem; padding: .55rem 1rem; border-radius: 12px;
+  background: var(--c); color: #fff;
+  font: 800 clamp(1rem, 3vw, 1.15rem)/1.25 var(--f-tit);
+}
+.subcab-verde { --c: var(--verde); }
+.tarjetas { display: grid; gap: .8rem; }
+.tf {
+  display: grid; grid-template-columns: 8.5rem 1fr; overflow: hidden;
+  background: #fff; border: 2px solid var(--c, var(--azul)); border-radius: 16px;
+}
+.tf h4 {
+  grid-column: 2; grid-row: 1; margin: 0; padding: .5rem .75rem;
+  background: var(--c, var(--azul)); color: #fff; font: 800 1rem/1.15 var(--f-tit);
+}
+.tf h4 small { display: block; margin-top: .15rem; font: 700 .8rem/1.2 var(--f-txt); opacity: .95; }
+.tf img { grid-column: 1; grid-row: 1 / span 2; width: 100%; height: 100%; min-height: 6.5rem; object-fit: cover; }
+.tf p { grid-column: 2; grid-row: 2; margin: 0; padding: .55rem .75rem .7rem; font-size: .97rem; line-height: 1.45; }
+@media (min-width: 640px) {
+  .tarjetas { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tf { display: flex; flex-direction: column; }
+  .tf h4 { text-align: center; }
+  .tf img { height: auto; min-height: 0; aspect-ratio: 16 / 9; }
+}
+
+/* ---------- fotos del tríptico ---------- */
+.foto-ancha { margin: 1.2rem 0 0; }
+.foto-ancha img {
+  width: 100%; border-radius: 16px; border: 4px solid #fff;
+  box-shadow: 0 18px 40px -26px rgba(13, 71, 161, .7);
+}
+.con-foto { display: grid; gap: 1rem; align-items: center; }
+.con-foto > .texto { margin: 0; }
+@media (min-width: 880px) {
+  .con-foto { grid-template-columns: 1fr 1fr; gap: 1.6rem; }
+  .con-foto .foto-ancha { margin: 0; }
+}
 
 /* ---------- simuladores ---------- */
 .simuladores {
