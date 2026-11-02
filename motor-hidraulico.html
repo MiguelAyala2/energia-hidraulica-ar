@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b3fae" />
   <meta name="description" content="Simulador 3D interactivo de una turbina Francis de Itaipú: abrí las compuertas y mirá el caudal, la velocidad, la frecuencia, la potencia y la energía que viaja por las líneas de transmisión hasta las casas." />
   <title>Simulador 3D · Turbina Francis de Itaipú</title>
-  <script>try { if (localStorage.getItem('tema-simulador') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}</script>
+  <script>try { localStorage.removeItem('tema-simulador'); if (sessionStorage.getItem('tema-sesion') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Nunito+Sans:wght@400;600;700;800&display=swap" />
@@ -856,7 +856,7 @@ function applyTheme(light) {
   pUni.uLight.value = light ? 1 : 0;
   pMat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending; pMat.needsUpdate = true;
   if (themeBtn) themeBtn.setAttribute('aria-pressed', light ? 'false' : 'true');
-  try { localStorage.setItem('tema-simulador', light ? 'light' : 'dark'); } catch (e) {}
+  try { sessionStorage.setItem('tema-sesion', light ? 'light' : 'dark'); } catch (e) {}
 }
 if (themeBtn) themeBtn.addEventListener('click', function () { applyTheme(htmlEl.getAttribute('data-theme') === 'dark'); });
 applyTheme(htmlEl.getAttribute('data-theme') !== 'dark');
