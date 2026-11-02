@@ -1,230 +1,188 @@
-<!doctype html><html lang="es"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Turbina Francis de Itaipú</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<style>
-/* Concepto: banda de título arriba; debajo, visor 3D a la izquierda y tablero de control a la derecha (en teléfono se apilan).
-   Look único y oscuro, de sala de control: tinta azulada, agua cian, cobre/ámbar para la electricidad. */
-:root {
-  color-scheme: dark;
-  --bg: #0a1117;
-  --panel: #101b25;
-  --panel-2: #152433;
-  --line: #20364a;
-  --fg: #e6eef4;
-  --muted: #8ba2b3;
-  --water: #3fb0ea;
-  --accent: #f4b13e;
-  --ok: #5fd6a4;
-  --stage-top: #10233a;
-  --stage-bot: #070d13;
-  --tag-bg: rgba(8, 16, 24, 0.78);
-  --f-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  --f-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --f-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
-}
-:root[data-theme="light"] {
-  --bg: #eef3f8;
-  --panel: #ffffff;
-  --panel-2: #eef2f7;
-  --line: #d7e1ea;
-  --fg: #1b2733;
-  --muted: #5a6b7a;
-  --water: #0a7fc2;
-  --accent: #c8780a;
-  --ok: #1f9d6b;
-  --stage-top: #cfe3f2;
-  --stage-bot: #eef3f8;
-  --tag-bg: rgba(255, 255, 255, 0.85);
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font: 15px/1.5 var(--f-body);
-  padding-block: 20px 44px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  transition: background .25s, color .25s;
-}
-.backlink { display: inline-block; margin: 0; color: var(--muted); font: 500 12px/1 var(--f-mono); text-decoration: none; }
-.backlink:hover { color: var(--water); }
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.logos {
-  background: #fff; border: 1px solid var(--line); border-radius: 6px;
-  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
-  gap: 1rem 1.6rem; padding: 0.8rem 1rem;
-}
-.logos img { height: 34px; width: auto; object-fit: contain; }
-.logos img.escudo { height: 48px; }
-.wrap { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 36px; }
-.top > div { min-width: 0; }
-.eyebrow { margin: 0 0 10px; font: 500 12px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
-h1 { margin: 0; font: 600 clamp(36px, 5.4vw, 60px)/.92 var(--f-display); letter-spacing: .01em; text-wrap: balance; }
-.lede { margin: 0; max-width: 58ch; color: var(--muted); min-width: 0; }
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b3fae" />
+  <meta name="description" content="Simulador 3D interactivo de una turbina Francis de Itaipú: abrí las compuertas y mirá el caudal, la velocidad, la frecuencia, la potencia y el LED que se enciende con la electricidad generada." />
+  <title>Simulador 3D · Turbina Francis de Itaipú</title>
+  <script>try { if (localStorage.getItem('tema-simulador') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Nunito+Sans:wght@400;600;700;800&display=swap" />
+  <link rel="stylesheet" href="/assets/css/inicio.css" />
+  <link rel="stylesheet" href="/assets/css/simulador.css" />
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="g-hoja" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86dc5f"/><stop offset="1" stop-color="#1f8f2e"/></linearGradient>
+      <linearGradient id="g-hoja2" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9be777"/><stop offset="1" stop-color="#2a9d36"/></linearGradient>
+    </defs>
+    <symbol id="rama" viewBox="0 0 100 110">
+      <path d="M48 108C50 84 54 62 66 40" stroke="#2b8a2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M64 46C64 22 80 6 98 2c2 22-10 40-34 44z" fill="url(#g-hoja)"/>
+      <path d="M64 46c8-14 18-26 30-38" stroke="#e3f8d9" stroke-width="1.6" fill="none" opacity=".8"/>
+      <path d="M54 72C40 50 18 44 2 50c10 20 30 30 52 22z" fill="url(#g-hoja2)"/>
+      <path d="M54 72C40 62 24 54 8 52" stroke="#e3f8d9" stroke-width="1.6" fill="none" opacity=".8"/>
+      <path d="M52 92c10-20 28-28 46-26-6 20-24 32-46 26z" fill="url(#g-hoja)"/>
+      <path d="M52 92c14-10 28-18 42-22" stroke="#e3f8d9" stroke-width="1.6" fill="none" opacity=".8"/>
+    </symbol>
+    <symbol id="i-gota" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5s4.5 5 4.5 8.3a4.5 4.5 0 0 1-9 0C7.5 7.5 12 2.5 12 2.5z"/><path d="M2.5 18c1.6-1.2 3.2-1.2 4.8 0s3.2 1.2 4.7 0 3.2-1.2 4.8 0 3.1 1.2 4.7 0"/><path d="M2.5 21.5c1.6-1.2 3.2-1.2 4.8 0s3.2 1.2 4.7 0 3.2-1.2 4.8 0 3.1 1.2 4.7 0"/></g></symbol>
+    <symbol id="i-rayo" viewBox="0 0 24 24"><path d="M13.5 2 4.5 13.5H11l-1 8.5 9-11.5h-6.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-represa" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6h20"/><path d="M4.5 6 7 20h10l2.5-14"/><path d="M8.5 11h7M9.3 15.5h5.4"/></g></symbol>
+    <symbol id="i-cubo" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></g></symbol>
+    <symbol id="i-medidor" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3.5 17a8.5 8.5 0 1 1 17 0"/><path d="M12 17l4-5"/><circle cx="12" cy="17" r="1.4"/></g></symbol>
+    <symbol id="i-ojo" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></g></symbol>
+    <symbol id="i-ruta" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H16a3.5 3.5 0 0 0 0-7H8a3.5 3.5 0 0 1 0-7h7.5"/></g></symbol>
+    <symbol id="i-casa" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></g></symbol>
+    <symbol id="i-luna" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sol" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></symbol>
+  </svg>
 
-.grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
-@media (max-width: 920px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-
-.stage {
-  position: relative; height: clamp(380px, 68vh, 700px); overflow: hidden;
-  border: 1px solid var(--line); border-radius: 6px;
-  background: linear-gradient(var(--stage-top), var(--stage-bot));
-}
-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
-canvas:active { cursor: grabbing; }
-#labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.tag {
-  position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; white-space: nowrap;
-  transform: translate(-50%, -50%); padding: 3px 8px 3px 3px; border-radius: 99px;
-  background: var(--tag-bg); border: 1px solid var(--line); color: var(--fg);
-  font: 500 11px/1 var(--f-mono);
-}
-.tag b {
-  display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
-  background: var(--accent); color: #1b1203; font-weight: 600;
-}
-.views { position: absolute; left: 12px; top: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
-.hint { position: absolute; left: 12px; bottom: 10px; right: 12px; margin: 0; font: 400 11px/1.3 var(--f-mono); color: var(--muted); pointer-events: none; }
-.fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted); }
-
-.btn, .chip {
-  font: 500 13px/1 var(--f-body); color: var(--fg); background: var(--panel-2);
-  border: 1px solid var(--line); border-radius: 4px; cursor: pointer;
-}
-.btn { padding: 11px 14px; width: 100%; }
-.chip { padding: 8px 11px; background: var(--tag-bg); }
-.btn:hover, .chip:hover { border-color: var(--water); }
-.btn.primary { background: var(--water); border-color: var(--water); color: #04131c; font-weight: 600; }
-.btn.primary:hover { filter: brightness(1.08); }
-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-.panel { display: flex; flex-direction: column; gap: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; min-width: 0; }
-.blk { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-top: 1px solid var(--line); }
-.blk:first-child { border-top: 0; }
-h2 { margin: 0; font: 500 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; }
-.row output { font: 500 14px/1 var(--f-mono); color: var(--water); }
-input[type=range] { width: 100%; accent-color: var(--water); margin: 2px 0 0; }
-.meters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
-.meters > div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 10px 10px 9px; min-width: 0; }
-.meters dt { font: 500 10.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.meters dd { margin: 0; display: flex; align-items: baseline; gap: 5px; }
-.meters dd span { font: 500 24px/1 var(--f-mono); font-variant-numeric: tabular-nums; }
-.meters dd i { font: 400 11px/1 var(--f-mono); font-style: normal; color: var(--muted); }
-.led { display: flex; flex-direction: column; gap: 8px; }
-.ledtop { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; }
-.ledtop b { font: 500 13px/1 var(--f-mono); color: var(--muted); }
-.ledtop b.on { color: var(--accent); }
-.bar { height: 8px; border-radius: 4px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
-.bar i { display: block; height: 100%; width: 0; background: var(--accent); }
-.chk { display: flex; align-items: center; gap: 10px; font-size: 14px; cursor: pointer; }
-.chk input { width: 16px; height: 16px; accent-color: var(--water); margin: 0; }
-.sel { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
-select { font: 400 13px/1.2 var(--f-body); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 9px 10px; width: 100%; }
-.foot { margin: 0; padding: 14px 16px 16px; border-top: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; color: var(--muted); }
-
-.path { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px 24px; }
-.path li { display: flex; gap: 12px; min-width: 0; }
-.path .n { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #1b1203; font: 600 12px/1 var(--f-mono); margin-top: 1px; }
-.path strong { display: block; font-weight: 600; margin-bottom: 2px; }
-.path span { display: block; color: var(--muted); font-size: 14px; }
-.sub { margin: 0 0 14px; font: 600 26px/1 var(--f-display); letter-spacing: .02em; }
-
-@media (max-width: 640px) {
-  .tag span { display: none; }
-  .tag { padding: 3px; }
-  .meters dd span { font-size: 21px; }
-}
-</style>
-
-<div class="wrap">
-  <div class="topbar">
-    <a class="backlink" href="/index.html">← Volver al inicio</a>
-    <button id="themeToggle" class="chip" type="button">☀️ Modo claro</button>
+  <div class="inst">
+    <img src="/assets/img/logo-gobierno.webp" width="700" height="105" alt="Gobierno del Paraguay · Paraguái Rekuái" />
+    <img src="/assets/img/logo-mec.webp" width="700" height="121" alt="Ministerio de Educación y Ciencias · Paraguái Tekombo'e ha Tembikuaa Motenondeha" />
   </div>
 
-  <div class="logos">
-    <img src="/assets/img/logo-gobierno.webp" alt="Gobierno del Paraguay" />
-    <img src="/assets/img/escudo-colegio.webp" alt="Colegio Nacional EMD Miguel Ángel Rodríguez" class="escudo" />
-    <img src="/assets/img/logo-mec.webp" alt="Ministerio de Educación y Ciencias" />
-  </div>
-
-  <header class="top">
-    <div>
-      <p class="eyebrow">Maqueta interactiva · unidad de 50 Hz del lado paraguayo</p>
-      <h1>Turbina Francis<br>de Itaipú</h1>
+  <nav class="barra" aria-label="Navegación">
+    <a class="marca" href="/index.html">
+      <img src="/assets/img/escudo-colegio.webp" width="400" height="439" alt="" />
+      <span>Energía <span class="t-verde">Hidráulica</span></span>
+    </a>
+    <div class="menu">
+      <a href="/index.html"><svg class="ico" aria-hidden="true"><use href="#i-casa"/></svg>Inicio</a>
+      <a href="#simulador" class="menu-3d">Simulador</a>
+      <a href="#recorrido">Recorrido</a>
+      <a href="/itaipu.html">Represa de Itaipú</a>
+      <button id="themeToggle" class="tema-btn" type="button" aria-pressed="false">
+        <svg class="ico ico-luna" aria-hidden="true"><use href="#i-luna"/></svg>
+        <svg class="ico ico-sol" aria-hidden="true"><use href="#i-sol"/></svg>
+        Modo oscuro
+      </button>
     </div>
-    <p class="lede">El agua baja del embalse por la tubería forzada, entra al caracol, empuja los álabes del rodete y sale por el tubo de aspiración. El eje hace girar el rotor del generador y la electricidad enciende el LED.</p>
+  </nav>
+
+  <header class="portada portada-sim">
+    <svg class="arcos" viewBox="0 0 1440 160" preserveAspectRatio="none" aria-hidden="true">
+      <defs><linearGradient id="g-arco" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0b3fae"/><stop offset=".5" stop-color="#1e88e5"/><stop offset="1" stop-color="#0b3fae"/></linearGradient></defs>
+      <path d="M0 0H1440V104C1100 12 340 12 0 104Z" fill="url(#g-arco)"/>
+      <path d="M0 118C340 28 1100 28 1440 118" stroke="#29c3f7" stroke-width="14" fill="none"/>
+      <path d="M0 136C340 48 1100 48 1440 136" stroke="#fff" stroke-width="5" fill="none" opacity=".9"/>
+      <path d="M0 150C360 64 1080 64 1440 150" stroke="#fff" stroke-width="2" fill="none" opacity=".6"/>
+    </svg>
+    <div class="portada-in">
+      <p class="pill pill-navy">Simulador 3D</p>
+      <p class="lineas"><span class="pill pill-azul">Maqueta interactiva</span></p>
+      <div class="titulo-fila">
+        <svg class="rama rama-izq" aria-hidden="true"><use href="#rama"/></svg>
+        <h1><span class="t-navy">Turbina Francis</span> <span class="t-verde">de Itaipú</span></h1>
+        <svg class="rama" aria-hidden="true"><use href="#rama"/></svg>
+      </div>
+      <p class="bajada">El agua baja del embalse por la tubería forzada, entra al caracol, empuja los álabes del rodete y sale por el tubo de aspiración. El eje hace girar el generador y la electricidad enciende el LED.</p>
+      <ul class="datos-sim">
+        <li><svg aria-hidden="true"><use href="#i-rayo"/></svg>≈ 700 MW por unidad</li>
+        <li><svg aria-hidden="true"><use href="#i-gota"/></svg>≈ 645 m³/s</li>
+        <li><svg aria-hidden="true"><use href="#i-represa"/></svg>Salto ≈ 118 m</li>
+      </ul>
+      <a class="btn btn-prim" href="#simulador"><svg class="ico" aria-hidden="true"><use href="#i-cubo"/></svg>Usar el simulador</a>
+    </div>
+    <svg class="onda" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 40C180 80 360 80 540 52S900 6 1080 28 1350 74 1440 60V90H0Z" fill="#fff" opacity=".55"/>
+      <path d="M0 58C200 90 400 88 600 64S960 26 1140 44 1360 80 1440 72V90H0Z" fill="currentColor"/>
+    </svg>
   </header>
 
-  <section class="grid">
-    <div class="stage" id="stage">
-      <canvas id="c" aria-label="Vista 3D de una turbina hidroeléctrica en funcionamiento"></canvas>
-      <div id="labels"></div>
-      <div class="views">
-        <button class="chip" type="button" data-view="all">Conjunto</button>
-        <button class="chip" type="button" data-view="turbine">Turbina</button>
-        <button class="chip" type="button" data-view="gen">Generador y LED</button>
-      </div>
-      <p class="hint">Arrastra para girar · rueda o pellizco para acercar</p>
-      <div class="fallback" id="fallback" hidden>No se pudo iniciar la vista 3D. Revisa que tu navegador tenga WebGL activado o prueba con otro.</div>
-    </div>
-
-    <aside class="panel" aria-label="Controles y lecturas">
-      <div class="blk">
-        <h2>Compuertas</h2>
-        <label for="gate" class="row"><span>Apertura del distribuidor</span><output id="gateOut" for="gate">75 %</output></label>
-        <input id="gate" type="range" min="0" max="100" step="1" value="75">
-        <button id="flowBtn" class="btn primary" type="button">Cerrar compuertas</button>
-      </div>
-      <div class="blk">
-        <h2>Lecturas de la unidad</h2>
-        <dl class="meters">
-          <div><dt>Caudal</dt><dd><span id="rQ">0</span><i>m³/s</i></dd></div>
-          <div><dt>Velocidad</dt><dd><span id="rRpm">0,0</span><i>rpm</i></dd></div>
-          <div><dt>Frecuencia</dt><dd><span id="rHz">0,0</span><i>Hz</i></dd></div>
-          <div><dt>Potencia</dt><dd><span id="rMW">0</span><i>MW</i></dd></div>
-        </dl>
-        <div class="led">
-          <div class="ledtop"><span>LED</span><b id="ledTxt">Apagado</b></div>
-          <div class="bar"><i id="ledBar"></i></div>
+  <main>
+    <section class="seccion" id="simulador">
+      <div class="sim-grid">
+        <div class="bloque escena">
+          <h2 class="cab"><span class="cab-ico"><svg aria-hidden="true"><use href="#i-cubo"/></svg></span>Maqueta 3D</h2>
+          <div class="stage" id="stage">
+            <canvas id="c" aria-label="Vista 3D de una turbina hidroeléctrica en funcionamiento"></canvas>
+            <div id="labels"></div>
+            <div class="views" role="group" aria-label="Encuadres de la cámara">
+              <button class="chip" type="button" data-view="all">Conjunto</button>
+              <button class="chip" type="button" data-view="turbine">Turbina</button>
+              <button class="chip" type="button" data-view="gen">Generador y LED</button>
+            </div>
+            <p class="hint">Arrastrá para girar · pellizcá o usá la rueda para acercar</p>
+            <div class="fallback" id="fallback" hidden>No se pudo iniciar la vista 3D. Revisá que tu navegador tenga WebGL activado o probá con otro.</div>
+          </div>
         </div>
-      </div>
-      <div class="blk">
-        <h2>Vista</h2>
-        <label class="chk" for="cut"><input id="cut" type="checkbox" checked> Ver por dentro</label>
-        <label class="chk" for="lab"><input id="lab" type="checkbox" checked> Etiquetas</label>
-        <label class="chk" for="slow"><input id="slow" type="checkbox" checked> Cámara lenta (30 %)</label>
-        <label class="sel" for="unit"><span>Unidad generadora</span>
-          <select id="unit">
-            <option value="50">50 Hz · lado paraguayo (66 polos)</option>
-            <option value="60">60 Hz · lado brasileño (78 polos)</option>
-          </select>
-        </label>
-      </div>
-      <p class="foot">Referencia: cada unidad de Itaipú entrega unos 700 MW con un caudal cercano a 645 m³/s y un salto de unos 118 m (valores aproximados). La maqueta no está a escala real y el LED hace de carga. La cámara lenta solo afecta lo que ves girar; las lecturas muestran la velocidad real.</p>
-    </aside>
-  </section>
 
-  <section>
-    <h2 class="sub">El recorrido del agua y de la energía</h2>
-    <ol class="path">
-      <li><b class="n">1</b><div><strong>Embalse</strong><span>Agua represada a gran altura. Ese desnivel es la energía de partida.</span></div></li>
-      <li><b class="n">2</b><div><strong>Tubería forzada</strong><span>Lleva el agua cuesta abajo y la presión crece con el desnivel.</span></div></li>
-      <li><b class="n">3</b><div><strong>Caracol</strong><span>Cámara en espiral que reparte el agua pareja alrededor del rodete.</span></div></li>
-      <li><b class="n">4</b><div><strong>Distribuidor</strong><span>Las palas directrices se abren o se cierran y regulan cuánta agua entra.</span></div></li>
-      <li><b class="n">5</b><div><strong>Rodete Francis</strong><span>El agua entra por el borde, empuja los álabes y sale hacia abajo. El rodete gira.</span></div></li>
-      <li><b class="n">6</b><div><strong>Tubo de aspiración</strong><span>Se ensancha para frenar el agua y devolverla al río sin desperdiciar desnivel.</span></div></li>
-      <li><b class="n">7</b><div><strong>Canal de fuga</strong><span>El agua turbinada vuelve al cauce, aguas abajo de la central.</span></div></li>
-      <li><b class="n">8</b><div><strong>Eje y generador</strong><span>El eje vertical gira el rotor, con sus polos magnéticos, frente al estator. Ese movimiento induce corriente en las bobinas de cobre.</span></div></li>
-      <li><b class="n">9</b><div><strong>Cable</strong><span>Conduce la corriente desde el estator hasta el consumo.</span></div></li>
-      <li><b class="n">10</b><div><strong>LED</strong><span>Se enciende cuando la potencia pasa su umbral y brilla más a medida que sube.</span></div></li>
-    </ol>
-  </section>
-</div>
+        <aside class="tablero" aria-label="Controles y lecturas">
+          <section class="bloque">
+            <h2 class="cab"><span class="cab-ico"><svg aria-hidden="true"><use href="#i-gota"/></svg></span>Compuertas</h2>
+            <label for="gate" class="fila"><span>Apertura del distribuidor</span><output id="gateOut" for="gate">75 %</output></label>
+            <input id="gate" type="range" min="0" max="100" step="1" value="75">
+            <button id="flowBtn" class="btn btn-prim btn-ancho" type="button">Cerrar compuertas</button>
+          </section>
+
+          <section class="bloque">
+            <h2 class="cab cab-naranja"><span class="cab-ico"><svg aria-hidden="true"><use href="#i-medidor"/></svg></span>Lecturas</h2>
+            <dl class="medidores">
+              <div><dt>Caudal</dt><dd><span id="rQ">0</span><small>m³/s</small></dd></div>
+              <div><dt>Velocidad</dt><dd><span id="rRpm">0,0</span><small>rpm</small></dd></div>
+              <div><dt>Frecuencia</dt><dd><span id="rHz">0,0</span><small>Hz</small></dd></div>
+              <div><dt>Potencia</dt><dd><span id="rMW">0</span><small>MW</small></dd></div>
+            </dl>
+            <div class="led">
+              <div class="led-top"><span><svg class="ico" aria-hidden="true"><use href="#i-rayo"/></svg>LED</span><b id="ledTxt">Apagado</b></div>
+              <div class="barra-led"><i id="ledBar"></i></div>
+            </div>
+          </section>
+
+          <section class="bloque">
+            <h2 class="cab cab-violeta"><span class="cab-ico"><svg aria-hidden="true"><use href="#i-ojo"/></svg></span>Vista</h2>
+            <label class="chk" for="cut"><input id="cut" type="checkbox" checked> Ver por dentro</label>
+            <label class="chk" for="lab"><input id="lab" type="checkbox" checked> Etiquetas</label>
+            <label class="chk" for="slow"><input id="slow" type="checkbox" checked> Cámara lenta (30 %)</label>
+            <label class="sel" for="unit"><span>Unidad generadora</span>
+              <select id="unit">
+                <option value="50">50 Hz · Paraguay (66 polos)</option>
+                <option value="60">60 Hz · Brasil (78 polos)</option>
+              </select>
+            </label>
+          </section>
+        </aside>
+      </div>
+      <p class="nota-ref">Referencia: cada unidad de Itaipú entrega unos 700 MW con un caudal cercano a 645 m³/s y un salto de unos 118 m (valores aproximados). La maqueta no está a escala real y el LED hace de carga. La cámara lenta solo afecta lo que ves girar; las lecturas muestran la velocidad real.</p>
+    </section>
+
+    <section class="seccion" id="recorrido">
+      <div class="bloque">
+        <h2 class="cab cab-verde"><span class="cab-ico"><svg aria-hidden="true"><use href="#i-ruta"/></svg></span>El recorrido del agua y de la energía</h2>
+        <ol class="recorrido">
+          <li><b>Embalse</b><span>Agua represada a gran altura. Ese desnivel es la energía de partida.</span></li>
+          <li><b>Tubería forzada</b><span>Lleva el agua cuesta abajo y la presión crece con el desnivel.</span></li>
+          <li><b>Caracol</b><span>Cámara en espiral que reparte el agua pareja alrededor del rodete.</span></li>
+          <li><b>Distribuidor</b><span>Las palas directrices se abren o se cierran y regulan cuánta agua entra.</span></li>
+          <li><b>Rodete Francis</b><span>El agua entra por el borde, empuja los álabes y sale hacia abajo. El rodete gira.</span></li>
+          <li><b>Tubo de aspiración</b><span>Se ensancha para frenar el agua y devolverla al río sin desperdiciar desnivel.</span></li>
+          <li><b>Canal de fuga</b><span>El agua turbinada vuelve al cauce, aguas abajo de la central.</span></li>
+          <li class="r-gen"><b>Eje y generador</b><span>El eje vertical gira el rotor, con sus polos magnéticos, frente al estator. Ese movimiento induce corriente en las bobinas de cobre.</span></li>
+          <li class="r-elec"><b>Cable</b><span>Conduce la corriente desde el estator hasta el consumo.</span></li>
+          <li class="r-elec"><b>LED</b><span>Se enciende cuando la potencia pasa su umbral y brilla más a medida que sube.</span></li>
+        </ol>
+        <ul class="leyenda" aria-label="Referencias de color">
+          <li>Recorrido del agua</li>
+          <li class="r-gen">Generación</li>
+          <li class="r-elec">Electricidad</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <img class="pie-agua" src="/assets/img/agua.webp" width="1024" height="296" loading="lazy" alt="" />
+    <div class="pie-in">
+      <img src="/assets/img/escudo-colegio.webp" width="400" height="439" loading="lazy" alt="Escudo del colegio" />
+      <strong>Colegio Nacional EMD Miguel Ángel Rodríguez</strong>
+      <span>Feria de Ciencias · Ñemby, Paraguay · 2026</span>
+      <a class="pie-volver" href="/index.html"><svg class="ico" aria-hidden="true"><use href="#i-casa"/></svg>Volver al inicio</a>
+    </div>
+  </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -255,24 +213,6 @@ var camera = new THREE.PerspectiveCamera(42, 1.6, 0.1, 500);
 scene.add(new THREE.HemisphereLight(0xbcd8ff, 0x1a2a38, 0.8));
 var sun = new THREE.DirectionalLight(0xffffff, 0.9); sun.position.set(20, 35, 25); scene.add(sun);
 var rimLight = new THREE.DirectionalLight(0x6fb6ff, 0.4); rimLight.position.set(-25, 10, -20); scene.add(rimLight);
-
-/* ---------- modo claro / oscuro ---------- */
-(function () {
-  var htmlEl = document.documentElement;
-  var btn = $('themeToggle');
-  function applyTheme(light) {
-    htmlEl.setAttribute('data-theme', light ? 'light' : 'dark');
-    if (btn) btn.textContent = light ? '🌙 Modo oscuro' : '☀️ Modo claro';
-    var bg = light ? 0xcfe3f2 : 0x0b1824;
-    scene.background = new THREE.Color(bg);
-    scene.fog.color = new THREE.Color(bg);
-    try { localStorage.setItem('tema-hidraulica', light ? 'light' : 'dark'); } catch (e) {}
-  }
-  var prefLight = false;
-  try { prefLight = localStorage.getItem('tema-hidraulica') === 'light'; } catch (e) {}
-  if (btn) btn.addEventListener('click', function () { applyTheme(htmlEl.getAttribute('data-theme') !== 'light'); });
-  applyTheme(prefLight);
-})();
 
 /* ---------- materiales ---------- */
 function M(c, o) { return new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.45, metalness: 0.55 }, o || {})); }
@@ -584,13 +524,16 @@ var pGeo = new THREE.BufferGeometry();
 pGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
 pGeo.setAttribute('aSize', new THREE.BufferAttribute(aSize, 1));
 pGeo.setAttribute('aAlpha', new THREE.BufferAttribute(aAlpha, 1));
-var pUni = { uScale: { value: 600 }, uMax: { value: 14 } };
+/* uLight = 1 en modo claro: sobre fondo claro la mezcla aditiva se pierde, así que
+   las gotas pasan a mezcla normal y a un azul más profundo. */
+var pUni = { uScale: { value: 600 }, uMax: { value: 14 }, uLight: { value: 0 } };
 var pMat = new THREE.ShaderMaterial({
   uniforms: pUni, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
   vertexShader: 'attribute float aSize; attribute float aAlpha; uniform float uScale; uniform float uMax; varying float vA;' +
     'void main(){ vA = aAlpha; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_PointSize = clamp(aSize * uScale / -mv.z, 1.5, uMax); gl_Position = projectionMatrix * mv; }',
-  fragmentShader: 'varying float vA; void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d); if (r > 0.5) discard; float f = smoothstep(0.5, 0.0, r);' +
-    'vec3 c = mix(vec3(0.22, 0.62, 0.95), vec3(0.88, 0.96, 1.0), f * f); gl_FragColor = vec4(c, vA * (0.3 + 0.7 * f)); }'
+  fragmentShader: 'uniform float uLight; varying float vA; void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d); if (r > 0.5) discard; float f = smoothstep(0.5, 0.0, r);' +
+    'vec3 c = mix(vec3(0.22, 0.62, 0.95), vec3(0.88, 0.96, 1.0), f * f * (1.0 - 0.75 * uLight));' +
+    'c = mix(c, vec3(0.04, 0.38, 0.86), 0.55 * uLight); gl_FragColor = vec4(c, vA * (0.3 + 0.7 * f) * (1.0 + 0.25 * uLight)); }'
 });
 var points = new THREE.Points(pGeo, pMat); points.frustumCulled = false; scene.add(points);
 
@@ -837,6 +780,27 @@ function frame(now) {
   updateLabels();
   requestAnimationFrame(frame);
 }
+
+/* ---------- modo claro / oscuro ---------- */
+var htmlEl = document.documentElement, themeBtn = $('themeToggle');
+function setGrid(c1, c2) {
+  scene.remove(grid);
+  grid = new THREE.GridHelper(240, 80, c1, c2); grid.position.y = -10.58; scene.add(grid);
+}
+function applyTheme(light) {
+  htmlEl.setAttribute('data-theme', light ? 'light' : 'dark');
+  var bg = light ? 0xd6edfb : 0x0b1824;
+  scene.background.setHex(bg); scene.fog.color.setHex(bg);
+  ground.material.color.setHex(light ? 0xa3c796 : 0x0d1b27);
+  bankM.color.setHex(light ? 0x4f7d47 : 0x15283a);
+  setGrid(light ? 0x9cc78f : 0x17304a, light ? 0xa9cf9d : 0x10243a);
+  pUni.uLight.value = light ? 1 : 0;
+  pMat.blending = light ? THREE.NormalBlending : THREE.AdditiveBlending; pMat.needsUpdate = true;
+  if (themeBtn) themeBtn.setAttribute('aria-pressed', light ? 'false' : 'true');
+  try { localStorage.setItem('tema-simulador', light ? 'light' : 'dark'); } catch (e) {}
+}
+if (themeBtn) themeBtn.addEventListener('click', function () { applyTheme(htmlEl.getAttribute('data-theme') === 'dark'); });
+applyTheme(htmlEl.getAttribute('data-theme') !== 'dark');
 
 buildPoles(NOM[50].poles);
 setCut(true);
