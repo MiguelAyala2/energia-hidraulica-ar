@@ -110,6 +110,7 @@
             </div>
             <p class="hint">Arrastrá para girar · pellizcá o usá la rueda para acercar</p>
             <div class="fallback" id="fallback" hidden>No se pudo iniciar la vista 3D. Revisá que tu navegador tenga WebGL activado o probá con otro.</div>
+            <div class="cargando" id="cargando" role="status">Cargando la maqueta 3D…</div>
           </div>
         </div>
 
@@ -192,6 +193,9 @@
 'use strict';
 var $ = function (id) { return document.getElementById(id); };
 if (typeof THREE === 'undefined') { $('fallback').hidden = false; return; }
+/* si algo falla, se muestra el motivo en la maqueta en lugar de dejarla en blanco */
+function avisar(texto) { var fb = $('fallback'), cg = $('cargando'); if (cg) cg.hidden = true; if (fb) { fb.textContent = texto; fb.hidden = false; } }
+window.addEventListener('error', function (e) { avisar('No se pudo iniciar la vista 3D (' + (e.message || 'error desconocido') + '). Probá recargar la página.'); });
 
 var PI = Math.PI, TAU = PI * 2;
 var lerp = function (a, b, t) { return a + (b - a) * t; };
@@ -208,6 +212,7 @@ try {
 /* en teléfonos se dibuja con menos resolución y menos detalle para que vaya fluido */
 var MOVIL = Math.min(screen.width, screen.height) < 768 || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
 var PR = Math.min(window.devicePixelRatio || 1, MOVIL ? 1.5 : 2);
+canvas.addEventListener('webglcontextlost', function (e) { e.preventDefault(); avisar('El teléfono se quedó sin memoria para la vista 3D. Cerrá otras pestañas o apps y recargá la página.'); });
 renderer.setPixelRatio(PR);
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1824);
@@ -871,6 +876,7 @@ setCut(true);
 resize();
 cam.dist = PRESETS.all.dist();
 applyCam();
+if ($('cargando')) $('cargando').hidden = true;
 requestAnimationFrame(frame);
 })();
 </script>
