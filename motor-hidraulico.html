@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0b3fae" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <meta name="description" content="Simulador 3D interactivo de una turbina Francis de Itaipú: abrí las compuertas y mirá el caudal, la velocidad, la frecuencia, la potencia y la energía que viaja por las líneas de transmisión hasta las casas." />
   <title>Simulador 3D · Turbina Francis de Itaipú</title>
   <script>try { localStorage.removeItem('tema-simulador'); if (sessionStorage.getItem('tema-sesion') === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}</script>
@@ -203,7 +205,9 @@ var canvas = $('c'), stage = $('stage'), renderer;
 try {
   renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
 } catch (err) { $('fallback').hidden = false; return; }
-var PR = Math.min(window.devicePixelRatio || 1, 2);
+/* en teléfonos se dibuja con menos resolución y menos detalle para que vaya fluido */
+var MOVIL = Math.min(screen.width, screen.height) < 768 || !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+var PR = Math.min(window.devicePixelRatio || 1, MOVIL ? 1.5 : 2);
 renderer.setPixelRatio(PR);
 var scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1824);
@@ -563,7 +567,7 @@ var LVN = 128, LV = new Float32Array(LVN + 1);
 for (var lk = 1; lk <= LVN; lk++) { var p0 = (lk - 1) / LVN * TAU, p1 = lk / LVN * TAU; LV[lk] = LV[lk - 1] + volRho((p0 + p1) / 2) * (p1 - p0); }
 var volLen = function (ph) { return LV[Math.min(LVN, Math.round(ph / TAU * LVN))]; };
 
-var COUNT = 2600, SW = 0.3, RUN_LEN = 3.2, RIV_LEN = 21;
+var COUNT = MOVIL ? 1500 : 2600, SW = 0.3, RUN_LEN = 3.2, RIV_LEN = 21;
 var V0 = 12, V1 = 8, V2 = 5, V3 = 6, V4 = 7, V5 = 6;
 var sec = new Uint8Array(COUNT), wv = new Float32Array(COUNT);
 function F() { return new Float32Array(COUNT); }
@@ -824,6 +828,9 @@ function update(dt) {
   }
 }
 
+/* si la maqueta no está en pantalla se sigue simulando pero no se dibuja: ahorra batería */
+var enPantalla = true;
+if ('IntersectionObserver' in window) new IntersectionObserver(function (e) { enPantalla = e[0].isIntersecting; }).observe(stage);
 var last = performance.now();
 function frame(now) {
   var dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
@@ -834,9 +841,7 @@ function frame(now) {
     if (k >= 1) tween = null;
   }
   update(dt);
-  applyCam();
-  renderer.render(scene, camera);
-  updateLabels();
+  if (enPantalla) { applyCam(); renderer.render(scene, camera); updateLabels(); }
   requestAnimationFrame(frame);
 }
 
