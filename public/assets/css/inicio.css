@@ -533,6 +533,35 @@ main { padding-bottom: 1rem; }
 .visitas svg { width: 1.25rem; height: 1.25rem; }
 .visitas b { font: 900 1.1rem/1 var(--f-tit); font-variant-numeric: tabular-nums; }
 
+/* ---------- compartir y autor (pie) ---------- */
+.compartir { display: flex; flex-direction: column; align-items: center; gap: .6rem; margin-top: 1rem; }
+.compartir-tit { margin: 0; font: 800 .98rem/1 var(--f-tit); }
+.compartir-botones { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; }
+.red {
+  --c: #fff;
+  display: inline-grid; place-items: center; width: 46px; height: 46px; padding: 0;
+  border: 0; border-radius: 50%; background: var(--c); color: #fff; text-decoration: none; cursor: pointer;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .35), 0 8px 16px -10px rgba(0, 0, 0, .6);
+  transition: transform .15s;
+}
+.red:hover { transform: translateY(-2px); }
+.red:focus-visible { outline-color: #fff; }
+.red svg { width: 24px; height: 24px; }
+.red-wa { --c: #128c7e; }
+.red-fb { --c: #1877f2; }
+.red-x { --c: #0f1419; }
+.red-tg { --c: #1d8fc7; }
+.red-copiar, .red-nativo { color: var(--navy); }
+.red-nativo { grid-auto-flow: column; gap: .45rem; width: auto; padding: 0 1.15rem; border-radius: 999px; font: 800 .95rem/1 var(--f-tit); }
+.red-nativo[hidden] { display: none; }
+.pie-in .red-nativo span { font-size: inherit; opacity: 1; }
+.compartir-aviso { min-height: 1.3em; margin: 0; font-weight: 800; font-size: .92rem; }
+.autor {
+  margin: .4rem 0 0; padding-top: .9rem; border-top: 1px solid rgba(255, 255, 255, .25);
+  font-size: .92rem; opacity: .95;
+}
+.autor b { font: 800 .98rem/1.3 var(--f-tit); }
+
 /* ---------- movimiento ---------- */
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }

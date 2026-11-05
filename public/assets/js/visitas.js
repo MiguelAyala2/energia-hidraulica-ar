@@ -6,7 +6,7 @@
   var caja = document.getElementById('visitas'), numero = document.getElementById('visitas-n');
   if (!caja || !numero || !window.fetch) return;
 
-  var clave = location.hostname === 'energia-hidraulica-ar.vercel.app' ? 'visitas' : 'visitas-pruebas';
+  var clave = location.hostname === 'energia-hidraulica-ar.vercel.app' ? 'visitas-sitio' : 'visitas-pruebas';
   var contada = false;
   try { contada = sessionStorage.getItem('visita-contada') === '1'; } catch (e) {}
 
